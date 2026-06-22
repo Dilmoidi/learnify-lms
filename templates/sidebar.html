@@ -16,6 +16,12 @@
                     <span>Dashboard</span>
                 </a>
             </li>
+            <li class="{% if 'leaderboard' in request.path %}active{% endif %}">
+                <a href="{% url 'leaderboard:leaderboard_view' %}">
+                    <i class="bi bi-bar-chart-line"></i>
+                    <span>Leaderboard</span>
+                </a>
+            </li>
 
             {% if user.role == 'student' or user.is_superuser %}
                 <li class="{% if request.resolver_match.url_name == 'course_list' or request.resolver_match.url_name == 'course_detail' %}active{% endif %}">
@@ -61,6 +67,18 @@
                     </a>
                 </li>
             {% endif %}
+
+            <!-- Support Navigation -->
+            <li class="{% if 'support' in request.path %}active{% endif %}">
+                <a href="{% if user.role == 'student' %}{% url 'support:ticket_list' %}{% else %}{% url 'support:support_dashboard' %}{% endif %}">
+                    <i class="bi bi-life-preserver"></i>
+                    {% if user.role == 'student' %}
+                        <span>Support Tickets</span>
+                    {% else %}
+                        <span>Manage Support</span>
+                    {% endif %}
+                </a>
+            </li>
 
             <li class="mt-4">
                 <hr style="border-color: var(--border-default);">

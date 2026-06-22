@@ -28,6 +28,9 @@ urlpatterns = [
     path('quizzes/', include('apps.quizzes.urls')),
     path('assignments/', include('apps.assignments.urls')),
     path('certificates/', include('apps.certificates.urls')),
+    path('notifications/', include('apps.notifications.urls')),
+    path('leaderboard/', include('apps.leaderboard.urls')),
+    path('support/', include('apps.support.urls')),
     path('', home_landing, name='home'),
 ]
 

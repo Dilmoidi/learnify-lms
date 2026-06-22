@@ -41,7 +41,7 @@
     {% if replies %}
         <div class="d-flex flex-column gap-3 mb-4">
             {% for reply in replies %}
-                <div class="card glass-card p-3 reply-card ms-4">
+                <div class="card glass-card p-3 reply-card ms-4 {% if reply.is_best_answer %}border-teal card-teal{% endif %}">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <div class="d-flex align-items-center gap-2">
                             {% if reply.user.profile_picture %}
@@ -53,10 +53,32 @@
                             <small class="badge badge-custom {% if reply.user.role == 'student' %}badge-teal{% elif reply.user.role == 'instructor' %}badge-amber{% else %}badge-purple{% endif %} text-uppercase" style="font-size: 0.60rem;">
                                 {{ reply.user.role }}
                             </small>
+                            {% if reply.user.role == 'instructor' %}
+                                <span class="badge badge-custom badge-amber" style="font-size: 0.6rem;">INSTRUCTOR REPLY</span>
+                            {% endif %}
+                            {% if reply.is_best_answer %}
+                                <span class="badge badge-custom badge-teal" style="font-size: 0.6rem;"><i class="bi bi-star-fill me-1"></i>BEST ANSWER</span>
+                            {% endif %}
                         </div>
                         <small class="text-muted" style="font-size: 0.75rem;">{{ reply.created_at|timesince }} ago</small>
                     </div>
                     <p class="text-secondary mb-0" style="font-size: 0.9rem; line-height: 1.5;">{{ reply.content|linebreaksbr }}</p>
+                    
+                    <div class="d-flex align-items-center gap-3 mt-3 pt-2 border-top border-default" style="font-size: 0.8rem;">
+                        <a href="{% url 'courses:like_discussion_reply' course.slug thread.id reply.id %}" class="text-decoration-none {% if request.user in reply.likes.all %}text-pink fw-bold{% else %}text-muted{% endif %} d-flex align-items-center gap-1">
+                            <i class="bi {% if request.user in reply.likes.all %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+                            <span>{{ reply.likes.count }} Likes</span>
+                        </a>
+                        
+                        {% if not reply.is_best_answer %}
+                            {% if thread.user == request.user or thread.course.instructor.user == request.user or request.user.is_superuser %}
+                                <a href="{% url 'courses:mark_best_reply' course.slug thread.id reply.id %}" class="text-decoration-none text-teal d-flex align-items-center gap-1">
+                                    <i class="bi bi-star"></i>
+                                    <span>Mark Best Answer</span>
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
                 </div>
             {% endfor %}
         </div>

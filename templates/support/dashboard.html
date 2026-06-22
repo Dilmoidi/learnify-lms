@@ -1,0 +1,344 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Support Center Dashboard - Learnify LMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="text-white mb-1">Support & Analytics Dashboard</h2>
+            <p class="text-secondary mb-0">Overview of ticket performance, live chat sessions, and support metrics.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'support:ticket_list' %}" class="btn btn-outline-premium d-flex align-items-center gap-2">
+                <i class="bi bi-list-task"></i> View Tickets Directory
+            </a>
+            <a href="{% url 'support:chat_home' %}" class="btn btn-premium d-flex align-items-center gap-2">
+                <i class="bi bi-chat-dots-fill"></i> Live Chat Portal
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Overview Cards Grid -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-4">
+        <!-- Card 1: Total Tickets (Teal) -->
+        <div class="col">
+            <div class="card glass-card card-teal p-3 h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted d-block" style="font-size: 0.8rem; text-transform: uppercase;">Total Tickets</span>
+                        <span class="fs-2 fw-bold text-white">{{ total_tickets }}</span>
+                    </div>
+                    <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                        <i class="bi bi-envelope-open text-teal fs-4"></i>
+                    </div>
+                </div>
+                <small class="text-muted d-block mt-2">Pending resolution: <strong>{{ pending_tickets }}</strong></small>
+            </div>
+        </div>
+
+        <!-- Card 2: Active Chats (Purple) -->
+        <div class="col">
+            <div class="card glass-card card-purple p-3 h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted d-block" style="font-size: 0.8rem; text-transform: uppercase;">Active Chats</span>
+                        <span class="fs-2 fw-bold text-white">{{ active_chats }}</span>
+                    </div>
+                    <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                        <i class="bi bi-chat-text text-purple-accent fs-4"></i>
+                    </div>
+                </div>
+                <small class="text-muted d-block mt-2">Instant messaging sessions</small>
+            </div>
+        </div>
+
+        <!-- Card 3: Resolution Rate (Teal) -->
+        <div class="col">
+            <div class="card glass-card card-teal p-3 h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted d-block" style="font-size: 0.8rem; text-transform: uppercase;">Resolution Rate</span>
+                        <span class="fs-2 fw-bold text-white">{{ resolution_rate }}%</span>
+                    </div>
+                    <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                        <i class="bi bi-shield-check text-teal fs-4"></i>
+                    </div>
+                </div>
+                <!-- Mini resolution progress bar -->
+                <div class="progress-container mt-2" style="height: 4px;">
+                    <div class="progress-bar-premium" style="width: {{ resolution_rate }}%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 4: Avg Response Time (Amber) -->
+        <div class="col">
+            <div class="card glass-card card-amber p-3 h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted d-block" style="font-size: 0.8rem; text-transform: uppercase;">Avg Response Time</span>
+                        <span class="fs-2 fw-bold text-white">{{ avg_response_minutes }}m</span>
+                    </div>
+                    <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                        <i class="bi bi-stopwatch text-amber fs-4"></i>
+                    </div>
+                </div>
+                <small class="text-muted d-block mt-2">From ticket creation to agent reply</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports CSV Download Actions Panel -->
+    <div class="card glass-card card-purple p-4 mb-4">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <div>
+                <h5 class="text-white mb-1"><i class="bi bi-file-earmark-spreadsheet text-purple-accent me-2"></i>Export Support Reports</h5>
+                <p class="text-secondary mb-0" style="font-size: 0.85rem;">Download spreadsheet records containing all ticket reports and agent performance logs.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'support:export_tickets_csv' %}" class="btn btn-premium btn-sm">
+                    <i class="bi bi-download me-1"></i>Export Tickets Report
+                </a>
+                {% if is_admin %}
+                    <a href="{% url 'support:export_agents_csv' %}" class="btn btn-outline-premium btn-sm">
+                        <i class="bi bi-download me-1"></i>Export Agent Performance
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Charts Row -->
+    <div class="row g-4 mb-4">
+        <!-- Chart 1: Issue Categories Distribution (Doughnut) -->
+        <div class="col-lg-4">
+            <div class="card glass-card p-4 h-100">
+                <h5 class="text-white mb-4"><i class="bi bi-pie-chart text-primary me-2"></i>Most Common Issues</h5>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart 2: Support Tickets Trend (Line) -->
+        <div class="col-lg-8">
+            <div class="card glass-card p-4 h-100">
+                <h5 class="text-white mb-4"><i class="bi bi-graph-up-arrow text-teal me-2"></i>Weekly Support Trend</h5>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Peak Support Hours Chart Row -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card glass-card p-4">
+                <h5 class="text-white mb-4"><i class="bi bi-clock-history text-amber me-2"></i>Peak Support Hours (Hourly Load Distribution)</h5>
+                <div style="height: 200px; position: relative;">
+                    <canvas id="hourChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agents Performance Table -->
+    <div class="card glass-card p-4 mb-4">
+        <h5 class="text-white mb-4"><i class="bi bi-person-lines-fill text-purple me-2"></i>Support Agent Performance</h5>
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0" style="--bs-table-bg: transparent;">
+                <thead>
+                    <tr class="text-muted" style="font-size: 0.8rem; border-bottom: 1px solid var(--border-default);">
+                        <th>AGENT NAME</th>
+                        <th>DEPARTMENT</th>
+                        <th style="text-align: center;">ASSIGNED TICKETS</th>
+                        <th style="text-align: center;">RESOLVED TICKETS</th>
+                        <th style="text-align: center;">AVG RESPONSE TIME</th>
+                        <th style="text-align: right;">STATUS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for agent_stat in agents_perf %}
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td class="fw-bold text-white">{{ agent_stat.username }}</td>
+                            <td><span class="badge badge-custom badge-purple">{{ agent_stat.department }}</span></td>
+                            <td style="text-align: center;" class="text-white">{{ agent_stat.assigned }}</td>
+                            <td style="text-align: center;" class="text-teal fw-bold">{{ agent_stat.resolved }}</td>
+                            <td style="text-align: center;" class="text-amber">{{ agent_stat.avg_time }} min</td>
+                            <td style="text-align: right;">
+                                <span class="badge badge-custom {% if agent_stat.status == 'Online' %}badge-teal{% elif agent_stat.status == 'Offline' %}bg-secondary text-white{% else %}badge-amber{% endif %}">
+                                    {{ agent_stat.status }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-secondary">
+                                No support agents profiles configured on the platform yet.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Double Columns: Active chats list & Recent Activities feed -->
+    <div class="row g-4">
+        <!-- Active chatrooms -->
+        <div class="col-lg-6">
+            <div class="card glass-card p-4 h-100">
+                <h5 class="text-white mb-4"><i class="bi bi-chat-text-fill text-purple-accent me-2"></i>Active Support Chats</h5>
+                
+                <div class="d-flex flex-column gap-3">
+                    {% for room in rooms %}
+                        <div class="p-3 bg-sidebar border border-default rounded d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; background: rgba(99,102,241,0.15); color: var(--color-primary); font-weight: bold; font-size: 0.8rem;">
+                                    {{ room.student.user.username|slice:":1"|upper }}
+                                </div>
+                                <div>
+                                    <span class="text-white fw-bold d-block" style="font-size: 0.85rem;">{{ room.student.user.get_full_name|default:room.student.user.username }}</span>
+                                    <small class="text-muted" style="font-size: 0.75rem;">Created: {{ room.created_at|date:"M d, Y" }}</small>
+                                </div>
+                            </div>
+                            <a href="{% url 'support:chat_room_view' room.id %}" class="btn btn-outline-premium btn-sm">Join</a>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-5 text-secondary">
+                            No live chat rooms active.
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activities Feed Timeline -->
+        <div class="col-lg-6">
+            <div class="card glass-card p-4 h-100">
+                <h5 class="text-white mb-4"><i class="bi bi-clock-history text-pink me-2"></i>Recent Support Activities</h5>
+                
+                <div class="d-flex flex-column gap-3">
+                    {% for act in recent_activities %}
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; min-width: 32px;">
+                                <i class="{{ act.icon }}" style="font-size: 0.9rem;"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <p class="text-white mb-0" style="font-size: 0.85rem; line-height: 1.4;">{{ act.text }}</p>
+                                <small class="text-muted" style="font-size: 0.75rem;">{{ act.time|timesince }} ago</small>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-5 text-secondary">
+                            No recent support activities recorded.
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Premium Dark Chart Config Defaults
+    Chart.defaults.color = '#cecbf6';
+    Chart.defaults.borderColor = 'rgba(38, 33, 92, 0.4)';
+
+    // Chart 1: Issue Categories Distribution (Doughnut)
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ category_labels|safe }},
+            datasets: [{
+                data: {{ category_counts|safe }},
+                backgroundColor: [
+                    '#5dcaa5', // Teal
+                    '#ef9f27', // Amber
+                    '#7f77dd', // Purple Light
+                    '#ed93b1', // Pink
+                    '#afa9ec'  // Purple Soft
+                ],
+                borderWidth: 1,
+                borderColor: '#1c1836'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 12, padding: 15 }
+                }
+            }
+        }
+    });
+
+    // Chart 2: Support Tickets Trend (Line)
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    const trendGradient = trendCtx.createLinearGradient(0, 0, 0, 200);
+    trendGradient.addColorStop(0, 'rgba(127, 119, 221, 0.4)');
+    trendGradient.addColorStop(1, 'rgba(127, 119, 221, 0.0)');
+
+    new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: {{ day_labels|safe }},
+            datasets: [{
+                label: 'Tickets Raised',
+                data: {{ ticket_trend_counts|safe }},
+                borderColor: '#7f77dd',
+                borderWidth: 2,
+                backgroundColor: trendGradient,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // Chart 3: Hourly Load Distribution (Bar)
+    const hourCtx = document.getElementById('hourChart').getContext('2d');
+    new Chart(hourCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ hour_labels|safe }},
+            datasets: [{
+                label: 'Tickets Created',
+                data: {{ hour_counts|safe }},
+                backgroundColor: 'rgba(239, 159, 27, 0.65)',
+                borderColor: '#ef9f27',
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+</script>
+{% endblock %}

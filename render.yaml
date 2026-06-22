@@ -1,0 +1,44 @@
+services:
+  # Python web service running Daphne ASGI server
+  - type: web
+    name: learnify-lms-web
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "daphne -b 0.0.0.0 -p $PORT learnify.asgi:application"
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: learnify.prod_settings
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "*"
+      # Link postgres database
+      - key: DATABASE_URL
+        fromDatabase:
+          name: learnify-db
+          property: connectionString
+      # Link redis service for Django Channels
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: learnify-redis
+          property: connectionString
+    # Mount persistent disk for media uploads (assignments, support files, certificates)
+    disk:
+      name: learnify-media
+      mountPath: /app/media
+      sizeGB: 1
+
+  # Redis service used for Django Channels WebSockets coordination
+  - type: redis
+    name: learnify-redis
+    ipAllowList: [] # Only allow internal network connections
+
+databases:
+  # PostgreSQL database for user details, courses, quizzes, and ticket tables
+  - name: learnify-db
+    databaseName: learnify_lms
+    user: learnify_user
+    ipAllowList: [] # Only allow internal network connections

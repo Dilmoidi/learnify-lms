@@ -127,10 +127,11 @@ class DiscussionReply(models.Model):
     user = models.ForeignKey('accounts.User', on_delete=models.CASCADE)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    likes = models.ManyToManyField('accounts.User', related_name='liked_replies', blank=True)
+    is_best_answer = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['created_at']
-
         verbose_name_plural = "Discussion Replies"
 
     def __str__(self):

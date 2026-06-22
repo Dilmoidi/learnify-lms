@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ticket #{{ ticket.ticket_id }} - Learnify LMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Back Button -->
+    <div class="mb-4">
+        <a href="{% url 'support:ticket_list' %}" class="text-secondary"><i class="bi bi-arrow-left me-1"></i> Back to Tickets List</a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Main Content (Ticket Info + Discussion Replies Timeline) -->
+        <div class="col-lg-8">
+            <!-- Ticket Header Info Card -->
+            <div class="card glass-card p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                    <div>
+                        <span class="text-primary fw-bold" style="font-size: 0.95rem;">TICKET #{{ ticket.ticket_id }}</span>
+                        <h2 class="text-white mt-1 mb-0">{{ ticket.subject }}</h2>
+                        <small class="text-muted d-block mt-1">Submitted by <strong>{{ ticket.student.user.username }}</strong> on {{ ticket.created_at|date:"M d, Y - H:i" }}</small>
+                    </div>
+                    
+                    <span class="badge badge-custom {% if ticket.status == 'open' %}bg-primary text-white{% elif ticket.status == 'in_progress' %}badge-amber{% elif ticket.status == 'resolved' %}badge-teal{% else %}bg-secondary text-white{% endif %} text-uppercase px-3 py-2">
+                        {{ ticket.get_status_display }}
+                    </span>
+                </div>
+
+                <hr class="border-default my-3">
+
+                <h6 class="text-primary">Description of Issue:</h6>
+                <div class="p-3 bg-sidebar border border-default rounded text-white mb-3" style="white-space: pre-wrap; font-size: 0.95rem; line-height: 1.6;">{{ ticket.description }}</div>
+
+                {% if ticket.attachment %}
+                    <div class="d-flex align-items-center gap-2 mt-2">
+                        <i class="bi bi-paperclip text-teal fs-5"></i>
+                        <span class="text-secondary" style="font-size: 0.85rem;">Attachment:</span>
+                        <a href="{{ ticket.attachment.url }}" download class="btn btn-outline-premium btn-sm py-1 px-2" style="font-size: 0.8rem;">
+                            <i class="bi bi-download me-1"></i>Download Handout File
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Responses Section -->
+            <h4 class="text-white mb-3"><i class="bi bi-chat-dots text-teal me-2"></i>Ticket History & Responses</h4>
+            
+            <div class="d-flex flex-column gap-3 mb-4">
+                {% for reply in replies %}
+                    <div class="card glass-card p-3 {% if reply.sender.role == 'student' %}reply-card{% else %}border-purple card-purple{% endif %}">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 26px; height: 26px; font-size: 0.75rem; {% if reply.sender.role == 'student' %}background: rgba(93,202,165,0.15); color: var(--teal-main);{% else %}background: rgba(83, 74, 183, 0.2); color: var(--purple-soft);{% endif %}">
+                                    {{ reply.sender.username|slice:":1"|upper }}
+                                </div>
+                                <span class="fw-bold {% if reply.sender.role == 'student' %}text-white{% else %}text-primary{% endif %}" style="font-size: 0.9rem;">
+                                    {{ reply.sender.get_full_name|default:reply.sender.username }}
+                                    {% if reply.sender.role != 'student' %}
+                                        <small class="badge badge-custom badge-purple ms-1" style="font-size: 0.65rem;">SUPPORT TEAM</small>
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <small class="text-muted" style="font-size: 0.75rem;">{{ reply.created_at|date:"M d, Y - H:i" }}</small>
+                        </div>
+                        
+                        <p class="text-white mb-2" style="white-space: pre-wrap; font-size: 0.9rem; line-height: 1.5;">{{ reply.message }}</p>
+                        
+                        {% if reply.attachment %}
+                            <div class="d-flex align-items-center gap-2 mt-1">
+                                <i class="bi bi-paperclip text-secondary"></i>
+                                <a href="{{ reply.attachment.url }}" download class="text-teal" style="font-size: 0.8rem;">
+                                    Download Attachment
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <div class="text-center py-4 text-secondary card glass-card">
+                        <i class="bi bi-chat-quote fs-2 d-block mb-1 text-muted"></i>
+                        <span>No comments or responses have been recorded on this ticket yet.</span>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Post a Response Form -->
+            {% if ticket.status != 'closed' %}
+                <div class="card glass-card p-4">
+                    <h5 class="text-white mb-3"><i class="bi bi-reply-all text-primary me-2"></i>Post a Comment</h5>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-12">
+                                {{ reply_form.message }}
+                                {% if reply_form.message.errors %}
+                                    <div class="text-pink mt-1">{{ reply_form.message.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-8">
+                                <label for="id_reply_attachment" class="form-label" style="font-size: 0.8rem;">Attachment (Optional)</label>
+                                {{ reply_form.attachment }}
+                                {% if reply_form.attachment.errors %}
+                                    <div class="text-pink mt-1">{{ reply_form.attachment.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button type="submit" name="btn_reply" class="btn btn-premium w-100 py-2">
+                                    Send Reply
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            {% else %}
+                <div class="alert glass-card card-teal text-center py-3">
+                    <i class="bi bi-lock-fill me-2 fs-5"></i>
+                    <span>This ticket has been marked as <strong>Closed</strong>. Posting new comments is disabled.</span>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar Properties Column (Ticket Info summary + Agent assignment form) -->
+        <div class="col-lg-4">
+            <div class="card glass-card p-4 mb-4">
+                <h5 class="text-white mb-4"><i class="bi bi-info-circle text-primary me-2"></i>Ticket Properties</h5>
+                
+                <div class="d-flex flex-column gap-3 mb-4" style="font-size: 0.9rem;">
+                    <div class="d-flex justify-content-between border-bottom border-default pb-2">
+                        <span class="text-muted">Category</span>
+                        <span class="text-white fw-bold">{{ ticket.get_category_display }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between border-bottom border-default pb-2">
+                        <span class="text-muted">Priority</span>
+                        <span class="badge badge-custom {% if ticket.priority == 'urgent' or ticket.priority == 'high' %}badge-pink{% elif ticket.priority == 'medium' %}badge-amber{% else %}badge-teal{% endif %} text-capitalize">{{ ticket.get_priority_display }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between border-bottom border-default pb-2">
+                        <span class="text-muted">Assigned Agent</span>
+                        <span class="text-white fw-bold">
+                            {% if ticket.assigned_to %}
+                                <i class="bi bi-person-badge text-teal me-1"></i>{{ ticket.assigned_to.user.username }}
+                            {% else %}
+                                <span class="text-muted">None (Unassigned)</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between border-bottom border-default pb-2">
+                        <span class="text-muted">Created</span>
+                        <span class="text-white">{{ ticket.created_at|date:"M d, Y H:i" }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Last Updated</span>
+                        <span class="text-white">{{ ticket.updated_at|date:"M d, Y H:i" }}</span>
+                    </div>
+                </div>
+
+                <!-- Update Properties Panel for Support Agents and Admins -->
+                {% if is_agent %}
+                    <hr class="border-default my-4">
+                    <h5 class="text-white mb-3"><i class="bi bi-pencil-square text-amber me-2"></i>Admin Assignment</h5>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_status" class="form-label" style="font-size: 0.8rem;">Change Status</label>
+                            {{ status_form.status }}
+                        </div>
+                        <div class="mb-4">
+                            <label for="id_assigned_to" class="form-label" style="font-size: 0.8rem;">Assign Support Agent</label>
+                            {{ status_form.assigned_to }}
+                        </div>
+                        <button type="submit" name="btn_update_status" class="btn btn-outline-premium w-100">
+                            Apply Changes
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

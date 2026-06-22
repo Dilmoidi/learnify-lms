@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Support Ticket - Learnify LMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0" style="max-width: 800px;">
+    <!-- Back Button -->
+    <div class="mb-3">
+        <a href="{% url 'support:ticket_list' %}" class="text-secondary"><i class="bi bi-arrow-left me-1"></i> Back to Tickets</a>
+    </div>
+
+    <!-- Create Ticket Card -->
+    <div class="card glass-card p-4">
+        <h3 class="text-white mb-1"><i class="bi bi-envelope-plus text-primary me-2"></i>Submit Support Ticket</h3>
+        <p class="text-secondary mb-4">Provide as much detail as possible to help us resolve your issue quickly.</p>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="row g-3">
+                <!-- Subject -->
+                <div class="col-12">
+                    <label for="id_subject" class="form-label">Subject</label>
+                    {{ form.subject }}
+                    {% if form.subject.errors %}
+                        <div class="text-pink mt-1">{{ form.subject.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Category & Priority -->
+                <div class="col-md-6">
+                    <label for="id_category" class="form-label">Category</label>
+                    {{ form.category }}
+                    {% if form.category.errors %}
+                        <div class="text-pink mt-1">{{ form.category.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-6">
+                    <label for="id_priority" class="form-label">Priority Level</label>
+                    {{ form.priority }}
+                    {% if form.priority.errors %}
+                        <div class="text-pink mt-1">{{ form.priority.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Description -->
+                <div class="col-12">
+                    <label for="id_description" class="form-label">Description of Issue</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <div class="text-pink mt-1">{{ form.description.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- File Attachment -->
+                <div class="col-12">
+                    <label for="id_attachment" class="form-label">Attachment <small class="text-muted">(Optional: PDF, screenshots, logs)</small></label>
+                    {{ form.attachment }}
+                    {% if form.attachment.errors %}
+                        <div class="text-pink mt-1">{{ form.attachment.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Submit buttons -->
+                <div class="col-12 mt-4">
+                    <button type="submit" class="btn btn-premium w-100 py-3">
+                        <i class="bi bi-send-fill me-2"></i>Submit Support Ticket
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

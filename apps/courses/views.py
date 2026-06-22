@@ -22,7 +22,7 @@ class CourseListView(ListView):
     paginate_by = 6
 
     def get_queryset(self):
-        queryset = Course.objects.filter(is_published=True).select_related('category', 'instructor__user')
+        queryset = Course.objects.filter(is_published=True).select_related('category', 'instructor__user').order_by('-created_at')
         search_query = self.request.GET.get('search')
         category_slug = self.request.GET.get('category')
 
@@ -271,6 +271,42 @@ def discussion_thread_detail(request, course_slug, thread_id):
         'replies': replies,
         'form': form
     })
+
+
+@login_required
+def like_discussion_reply(request, course_slug, thread_id, reply_id):
+    reply = get_object_or_404(DiscussionReply, pk=reply_id, thread_id=thread_id)
+    if request.user in reply.likes.all():
+        reply.likes.remove(request.user)
+    else:
+        reply.likes.add(request.user)
+    return redirect('courses:discussion_thread_detail', course_slug=course_slug, thread_id=thread_id)
+
+
+@login_required
+def mark_best_reply(request, course_slug, thread_id, reply_id):
+    thread = get_object_or_404(DiscussionThread, pk=thread_id)
+    reply = get_object_or_404(DiscussionReply, pk=reply_id, thread=thread)
+    
+    is_author = thread.user == request.user
+    is_instructor = getattr(thread.course.instructor, 'user', None) == request.user
+    if is_author or is_instructor or request.user.is_superuser:
+        thread.replies.all().update(is_best_answer=False)
+        reply.is_best_answer = True
+        reply.save()
+        messages.success(request, "Best answer marked!")
+        
+        if hasattr(reply.user, 'student_profile'):
+            from apps.gamification.utils import recalculate_score, create_notification
+            recalculate_score(reply.user.student_profile)
+            create_notification(
+                user=reply.user,
+                message=f"🌟 Your reply on thread '{thread.title}' was marked as the Best Answer! +15 leaderboard points awarded."
+            )
+    else:
+        messages.error(request, "You are not authorized to mark the best answer.")
+        
+    return redirect('courses:discussion_thread_detail', course_slug=course_slug, thread_id=thread_id)
 
 
 # Create Course Review

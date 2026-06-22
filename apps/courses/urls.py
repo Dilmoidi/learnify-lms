@@ -14,6 +14,8 @@ urlpatterns = [
     # Forum & reviews
     path('<slug:course_slug>/forums/create/', views.create_discussion_thread, name='create_discussion_thread'),
     path('<slug:course_slug>/forums/<int:thread_id>/', views.discussion_thread_detail, name='discussion_thread_detail'),
+    path('<slug:course_slug>/forums/<int:thread_id>/replies/<int:reply_id>/like/', views.like_discussion_reply, name='like_discussion_reply'),
+    path('<slug:course_slug>/forums/<int:thread_id>/replies/<int:reply_id>/best/', views.mark_best_reply, name='mark_best_reply'),
     path('<slug:course_slug>/reviews/create/', views.create_course_review, name='create_course_review'),
     
     # Instructor Course actions

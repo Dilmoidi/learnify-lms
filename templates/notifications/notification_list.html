@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Notifications - Learnify LMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="text-white mb-1">My Notifications</h2>
+            <p class="text-secondary mb-0">Stay updated on your course progress, badges, and feedback.</p>
+        </div>
+        {% if unread_notifications_count > 0 %}
+            <form method="post" action="{% url 'notifications:mark_all_read' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-premium btn-sm d-flex align-items-center gap-2">
+                    <i class="bi bi-check-all"></i> Mark All as Read
+                </button>
+            </form>
+        {% endif %}
+    </div>
+
+    <div class="card glass-card p-4">
+        {% if notifications %}
+            <div class="d-flex flex-column gap-3">
+                {% for notif in notifications %}
+                    <div class="p-3 rounded border {% if notif.is_read %}border-default bg-sidebar opacity-75{% else %}border-purple card-purple{% endif %} d-flex align-items-center justify-content-between gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: {% if notif.is_read %}rgba(255,255,255,0.05){% else %}rgba(99,102,241,0.15){% endif %}; color: {% if notif.is_read %}var(--color-text-muted){% else %}var(--color-primary){% endif %};">
+                                <i class="bi {% if '🏆' in notif.message %}bi-trophy{% elif 'grade' in notif.message or 'score' in notif.message %}bi-patch-check{% else %}bi-bell{% endif %} fs-5"></i>
+                            </div>
+                            <div>
+                                <span class="text-white d-block" style="font-size: 0.95rem;">{{ notif.message }}</span>
+                                <small class="text-muted d-block mt-1">{{ notif.created_at|date:"M d, Y - H:i" }}</small>
+                            </div>
+                        </div>
+                        
+                        {% if not notif.is_read %}
+                            <form method="post" action="{% url 'notifications:mark_as_read' notif.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-premium btn-sm p-1 px-2" style="font-size: 0.8rem;">
+                                    Mark Read
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5 text-secondary">
+                <i class="bi bi-bell-slash fs-1 d-block mb-3 text-muted"></i>
+                <span>You have no notifications yet.</span>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

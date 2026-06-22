@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: learnify_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=learnify_db
+      - POSTGRES_USER=learnify_user
+      - POSTGRES_PASSWORD=learnify_password
+    restart: always
+    expose:
+      - 5432
+
+  redis:
+    image: redis:7-alpine
+    container_name: learnify_redis
+    restart: always
+    expose:
+      - 6379
+
+  web:
+    build: .
+    container_name: learnify_web
+    command: daphne -b 0.0.0.0 -p 8000 learnify.asgi:application
+    volumes:
+      - django_static:/app/staticfiles
+      - django_media:/app/media
+    environment:
+      - DJANGO_SETTINGS_MODULE=learnify.prod_settings
+      - DJANGO_SECRET_KEY=django-insecure-prod-key-7f77dd5dcaa5ef9f27
+      - DJANGO_DEBUG=False
+      - ALLOWED_HOSTS=*
+      - DATABASE_URL=postgres://learnify_user:learnify_password@db:5432/learnify_db
+      - REDIS_URL=redis://redis:6379/1
+    depends_on:
+      - db
+      - redis
+    restart: always
+    expose:
+      - 8000
+
+  nginx:
+    image: nginx:alpine
+    container_name: learnify_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - django_static:/app/staticfiles:ro
+      - django_media:/app/media:ro
+    depends_on:
+      - web
+    restart: always
+
+volumes:
+  postgres_data:
+  django_static:
+  django_media:

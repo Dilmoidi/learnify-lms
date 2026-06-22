@@ -83,6 +83,97 @@
             </div>
         </div>
 
+        <!-- Gamification Widgets Row -->
+        <div class="row g-4 mb-5">
+            <!-- Learning Streak Widget -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card glass-card card-amber p-4 h-100">
+                    <h5 class="text-white mb-3"><i class="bi bi-fire text-amber me-2"></i>Learning Streak</h5>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="fs-1 fw-bold text-white">{{ streak.current_streak|default:0 }}</div>
+                        <div>
+                            <span class="text-white fw-bold d-block">Days Active</span>
+                            <small class="text-muted">Longest: {{ streak.longest_streak|default:0 }} days</small>
+                        </div>
+                    </div>
+                    <!-- Small indicator status -->
+                    <div class="d-flex justify-content-between pt-2 border-top border-default">
+                        <span class="badge badge-custom {% if streak.current_streak > 0 %}badge-teal{% else %}badge-purple{% endif %}" style="font-size: 0.7rem;">Active Today</span>
+                        <small class="text-muted">Last activity: {{ streak.last_activity_date|default:"Never" }}</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leaderboard Rank Widget -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card glass-card card-teal p-4 h-100">
+                    <h5 class="text-white mb-3"><i class="bi bi-bar-chart-line text-teal me-2"></i>Leaderboard Rank</h5>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="fs-1 fw-bold text-white">#{{ user_rank|default:"-" }}</div>
+                        <div>
+                            <span class="text-white fw-bold d-block">{{ leaderboard_record.score|default:0 }} pts</span>
+                            <small class="text-muted">Ranked among peers</small>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between pt-2 border-top border-default">
+                        <a href="{% url 'leaderboard:leaderboard_view' %}" class="btn btn-premium btn-sm w-100 text-center" style="font-size: 0.75rem;">View Full Leaderboard</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skill Progression Widget -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card glass-card card-purple p-4 h-100">
+                    <h5 class="text-white mb-3"><i class="bi bi-gear-wide-connected text-purple-accent me-2"></i>Skill Progress</h5>
+                    {% if skills %}
+                        <div class="d-flex flex-column gap-2" style="max-height: 120px; overflow-y: auto;">
+                            {% for skill in skills %}
+                                <div>
+                                    <div class="d-flex justify-content-between text-secondary mb-1" style="font-size: 0.7rem; text-transform: uppercase;">
+                                        <span>{{ skill.skill_name }}</span>
+                                        <span class="fw-bold text-white">{{ skill.progress_percent }}%</span>
+                                    </div>
+                                    <div class="progress-container" style="height: 4px;">
+                                        <div class="progress-bar-premium" style="width: {{ skill.progress_percent }}%;"></div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <small class="text-muted d-block py-3 text-center">Complete syllabus lessons to build skill stats.</small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Badges Unlocked Widget -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card glass-card card-pink p-4 h-100">
+                    <h5 class="text-white mb-3"><i class="bi bi-award text-pink me-2"></i>Achievements</h5>
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        {% for sb in unlocked_badges %}
+                            <span class="badge badge-custom badge-teal d-flex align-items-center gap-1" title="{{ sb.badge.description }}" style="font-size: 0.75rem; cursor: help;">
+                                <i class="bi {{ sb.badge.icon }}"></i> {{ sb.badge.name }}
+                            </span>
+                        {% empty %}
+                            <small class="text-muted py-2 text-center w-100">No achievements unlocked yet.</small>
+                        {% endfor %}
+                    </div>
+                    {% if locked_badges %}
+                        <div class="border-top border-default pt-2">
+                            <span class="text-muted" style="font-size: 0.7rem; text-transform: uppercase;">Next Up:</span>
+                            <div class="d-flex gap-1 mt-1 overflow-hidden" style="max-height: 25px;">
+                                {% for lb in locked_badges %}
+                                    <span class="badge bg-sidebar border border-default text-muted d-flex align-items-center gap-1" title="Locked: {{ lb.description }}" style="font-size: 0.65rem; cursor: help; opacity: 0.6;">
+                                        <i class="bi {{ lb.icon }}"></i> {{ lb.name }}
+                                    </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
         <div class="row g-4">
             <!-- Left Side: Enrolled Courses List -->
             <div class="col-xl-8">
@@ -206,6 +297,25 @@
                     {% else %}
                         <small class="text-muted">No recent quiz or assignment submissions recorded.</small>
                     {% endif %}
+                </div>
+
+                <!-- Support Center Card -->
+                <div class="card glass-card card-purple p-4 mt-4">
+                    <h5 class="text-white mb-2"><i class="bi bi-life-preserver text-purple me-2"></i>Support Center</h5>
+                    <p class="text-secondary mb-3" style="font-size: 0.85rem;">Need assistance? Get real-time help or raise a support ticket.</p>
+                    
+                    {% if active_tickets_count > 0 %}
+                        <div class="alert bg-sidebar border-default p-2 text-white mb-3 d-flex align-items-center justify-content-between" style="font-size: 0.8rem; border-left: 3px solid var(--amber-main);">
+                            <span><i class="bi bi-info-circle text-amber me-1"></i>You have <strong>{{ active_tickets_count }}</strong> active support ticket(s).</span>
+                            <a href="{% url 'support:ticket_list' %}" class="text-teal fw-bold">View</a>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'support:ticket_list' %}" class="btn btn-premium btn-sm flex-grow-1">
+                            <i class="bi bi-chat-dots-fill me-1"></i>Open Support Portal
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -340,7 +450,7 @@
     <!-- ========================================== -->
     {% elif role == 'admin' %}
         <!-- Color Coded Cards -->
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-5">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-5 g-4 mb-5">
             <!-- Teal: Total Users -->
             <div class="col">
                 <div class="card glass-card card-teal p-3 h-100">
@@ -399,6 +509,23 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Amber: Open Support Tickets -->
+            <div class="col">
+                <a href="{% url 'support:ticket_list' %}" class="d-block text-decoration-none h-100">
+                    <div class="card glass-card card-amber p-3 h-100">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <span class="text-muted d-block" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">Support Tickets</span>
+                                <span class="fs-2 fw-bold text-white">{{ admin_open_tickets|default:0 }}</span>
+                            </div>
+                            <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                                <i class="bi bi-life-preserver text-amber fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
             </div>
         </div>
 

@@ -1,0 +1,369 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Live Support Chat - Learnify LMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        height: 65vh;
+        min-height: 450px;
+    }
+    .chat-messages {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 20px;
+        background: rgba(19, 16, 42, 0.4);
+        border: 1px solid var(--border-default);
+        border-radius: 8px;
+    }
+    .message-bubble {
+        max-width: 75%;
+        padding: 10px 15px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        position: relative;
+    }
+    .message-student {
+        background: rgba(93, 202, 165, 0.15);
+        border: 1px solid var(--teal-border);
+        color: var(--text-primary);
+        align-self: flex-start;
+        border-top-left-radius: 2px;
+    }
+    .message-agent {
+        background: rgba(83, 74, 183, 0.25);
+        border: 1px solid var(--border-strong);
+        color: var(--text-primary);
+        align-self: flex-end;
+        border-top-right-radius: 2px;
+    }
+    .message-self {
+        background: rgba(83, 74, 183, 0.25) !important;
+        border: 1px solid var(--border-strong) !important;
+        align-self: flex-end !important;
+        border-top-right-radius: 2px !important;
+        border-top-left-radius: 12px !important;
+    }
+    .message-other {
+        background: rgba(93, 202, 165, 0.15) !important;
+        border: 1px solid var(--teal-border) !important;
+        align-self: flex-start !important;
+        border-top-left-radius: 2px !important;
+        border-top-right-radius: 12px !important;
+    }
+    .chat-meta {
+        font-size: 0.75rem;
+        margin-top: 4px;
+        display: block;
+        opacity: 0.7;
+    }
+    .online-indicator {
+        width: 8px;
+        height: 8px;
+        background-color: var(--teal-main);
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 8px var(--teal-main);
+    }
+    .offline-indicator {
+        width: 8px;
+        height: 8px;
+        background-color: var(--text-muted);
+        border-radius: 50%;
+        display: inline-block;
+    }
+    .typing-indicator {
+        font-size: 0.8rem;
+        font-style: italic;
+        color: var(--text-secondary);
+        min-height: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0" style="max-width: 900px;">
+    <!-- Back Button -->
+    <div class="mb-3">
+        {% if user.role == 'student' %}
+            <a href="{% url 'dashboard' %}" class="text-secondary"><i class="bi bi-arrow-left me-1"></i> Dashboard</a>
+        {% else %}
+            <a href="{% url 'support:chat_home' %}" class="text-secondary"><i class="bi bi-arrow-left me-1"></i> Support Dashboard</a>
+        {% endif %}
+    </div>
+
+    <!-- Chat Card -->
+    <div class="card glass-card p-4">
+        <!-- Header Info -->
+        <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom border-default">
+            <div>
+                <h4 class="text-white mb-1">
+                    <i class="bi bi-chat-right-text text-purple me-2"></i>
+                    {% if user.role == 'student' %}
+                        Academic & Tech Live Support
+                    {% else %}
+                        Student Support Chat: {{ room.student.user.username }}
+                    {% endif %}
+                </h4>
+                <div class="d-flex align-items-center gap-2 mt-1">
+                    <span id="partnerStatusIndicator" class="offline-indicator"></span>
+                    <span id="partnerStatusText" class="text-muted" style="font-size: 0.8rem;">Connecting...</span>
+                </div>
+            </div>
+            
+            {% if user.role == 'student' and room.support_agent %}
+                <div class="text-end" style="font-size: 0.85rem;">
+                    <span class="text-muted">Assigned:</span>
+                    <span class="text-white fw-bold d-block">{{ room.support_agent.user.username }}</span>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Chat Container -->
+        <div class="chat-container">
+            <!-- Messages Viewport -->
+            <div id="chatMessages" class="chat-messages d-flex flex-column">
+                {% for msg in past_messages %}
+                    <div class="message-bubble {% if msg.sender == user %}message-self{% else %}message-other{% endif %}">
+                        <small class="fw-bold d-block mb-1" style="font-size: 0.75rem;">{{ msg.sender.username }}</small>
+                        
+                        {% if msg.message %}
+                            <p class="mb-0">{{ msg.message }}</p>
+                        {% endif %}
+                        
+                        {% if msg.file %}
+                            <div class="d-flex align-items-center gap-2 mt-2 p-2 rounded bg-sidebar border border-default">
+                                <i class="bi bi-paperclip text-teal"></i>
+                                <a href="{{ msg.file.url }}" download class="text-teal" style="font-size: 0.8rem; text-decoration: underline;">
+                                    Download Attachment
+                                </a>
+                            </div>
+                        {% endif %}
+                        <span class="chat-meta text-end">{{ msg.timestamp|date:"H:i" }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Typing status indicator -->
+            <div id="typingIndicator" class="typing-indicator mt-2 px-2"></div>
+
+            <!-- Message Form Input Footer -->
+            <div class="chat-footer mt-3">
+                <form id="chatForm" class="d-flex gap-2 align-items-center">
+                    <!-- File upload trigger -->
+                    <button type="button" class="btn btn-outline-premium py-2 px-3" onclick="document.getElementById('fileInput').click()" title="Attach file">
+                        <i class="bi bi-paperclip"></i>
+                    </button>
+                    <input type="file" id="fileInput" class="d-none" onchange="uploadFile()">
+
+                    <input type="text" id="chatMessageInput" class="form-control bg-sidebar border-default text-primary py-2" placeholder="Type a message here..." autocomplete="off">
+                    
+                    <button type="submit" class="btn btn-premium py-2 px-4 d-flex align-items-center gap-2">
+                        <i class="bi bi-send-fill"></i> Send
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const roomId = "{{ room.id }}";
+    const currentUsername = "{{ user.username }}";
+    const currentUserId = parseInt("{{ user.id }}");
+    const wsScheme = "{{ ws_scheme }}";
+    
+    // Setup WebSocket
+    const wsUrl = `${wsScheme}://${window.location.host}/ws/support/chat/${roomId}/`;
+    const socket = new WebSocket(wsUrl);
+    
+    const chatMessages = document.getElementById('chatMessages');
+    const chatMessageInput = document.getElementById('chatMessageInput');
+    const chatForm = document.getElementById('chatForm');
+    const typingIndicator = document.getElementById('typingIndicator');
+    const partnerStatusIndicator = document.getElementById('partnerStatusIndicator');
+    const partnerStatusText = document.getElementById('partnerStatusText');
+
+    // Auto scroll chat viewport
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    scrollToBottom();
+
+    // WebSocket open
+    socket.onopen = function(e) {
+        console.log("WebSocket connection established!");
+        partnerStatusIndicator.className = 'online-indicator';
+        partnerStatusText.innerText = 'Connected';
+    };
+
+    // WebSocket close
+    socket.onclose = function(e) {
+        console.log("WebSocket connection closed.");
+        partnerStatusIndicator.className = 'offline-indicator';
+        partnerStatusText.innerText = 'Disconnected';
+    };
+
+    // WebSocket error
+    socket.onerror = function(e) {
+        console.error("WebSocket encountered an error:", e);
+    };
+
+    // Receive message
+    socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const action = data.action;
+
+        if (action === 'message') {
+            const sender = data.sender;
+            const senderId = data.sender_id;
+            const message = data.message;
+            const fileUrl = data.file_url;
+            const fileName = data.file_name;
+            const timestamp = data.timestamp;
+
+            appendMessage(sender, senderId, message, fileUrl, fileName, timestamp);
+            scrollToBottom();
+        } else if (action === 'typing') {
+            const sender = data.sender;
+            const senderId = data.sender_id;
+            const isTyping = data.typing;
+
+            if (senderId !== currentUserId) {
+                if (isTyping) {
+                    typingIndicator.innerText = `${sender} is typing...`;
+                } else {
+                    typingIndicator.innerText = '';
+                }
+            }
+        } else if (action === 'status') {
+            const username = data.username;
+            const userId = data.user_id;
+            const online = data.online;
+
+            if (userId !== currentUserId) {
+                if (online) {
+                    partnerStatusIndicator.className = 'online-indicator';
+                    partnerStatusText.innerText = 'Active now';
+                } else {
+                    partnerStatusIndicator.className = 'offline-indicator';
+                    partnerStatusText.innerText = 'Offline';
+                }
+            }
+        }
+    };
+
+    // Append markup
+    function appendMessage(sender, senderId, message, fileUrl, fileName, timestamp) {
+        const bubbleClass = senderId === currentUserId ? 'message-self' : 'message-other';
+        let fileMarkup = '';
+        if (fileUrl) {
+            fileMarkup = `
+                <div class="d-flex align-items-center gap-2 mt-2 p-2 rounded bg-sidebar border border-default">
+                    <i class="bi bi-paperclip text-teal"></i>
+                    <a href="${fileUrl}" download class="text-teal" style="font-size: 0.8rem; text-decoration: underline;">
+                        Download ${fileName || 'Attachment'}
+                    </a>
+                </div>
+            `;
+        }
+        
+        let messageMarkup = '';
+        if (message) {
+            messageMarkup = `<p class="mb-0">${message}</p>`;
+        }
+
+        const msgHtml = `
+            <div class="message-bubble ${bubbleClass}">
+                <small class="fw-bold d-block mb-1" style="font-size: 0.75rem;">${sender}</small>
+                ${messageMarkup}
+                ${fileMarkup}
+                <span class="chat-meta text-end">${timestamp}</span>
+            </div>
+        `;
+        chatMessages.insertAdjacentHTML('beforeend', msgHtml);
+    }
+
+    // Submit Text Message
+    chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const message = chatMessageInput.value.trim();
+        if (message === '') return;
+
+        // Send payload via socket
+        socket.send(jsonPayload('chat_message', { message: message }));
+        chatMessageInput.value = '';
+        
+        // Notify typing stopped
+        sendTypingStatus(false);
+    });
+
+    // Helper payload JSON stringify
+    function jsonPayload(action, additional) {
+        return JSON.stringify({ action: action, ...additional });
+    }
+
+    // Handle typing events
+    let typingTimeout;
+    chatMessageInput.addEventListener('keypress', function() {
+        sendTypingStatus(true);
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+            sendTypingStatus(false);
+        }, 1500);
+    });
+
+    function sendTypingStatus(isTyping) {
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(jsonPayload('typing', { typing: isTyping }));
+        }
+    }
+
+    // Async upload file
+    async function uploadFile() {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            // Get CSRF Token
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            const response = await fetch(`/support/chat/${roomId}/upload/`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            });
+
+            const result = await response.json();
+            if (result.status === 'success') {
+                // Broadcast uploaded file info over socket
+                socket.send(jsonPayload('chat_message', {
+                    message: '',
+                    file_url: result.file_url,
+                    file_name: result.file_name
+                }));
+            } else {
+                alert("File upload failed: " + result.message);
+            }
+        } catch (error) {
+            console.error("Error uploading file:", error);
+            alert("Error uploading file.");
+        } finally {
+            fileInput.value = ''; // Reset file input
+        }
+    }
+</script>
+{% endblock %}

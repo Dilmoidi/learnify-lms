@@ -45,6 +45,30 @@ def dashboard_home(request):
         recent_results = Result.objects.filter(student=student).select_related('quiz__course').order_by('-completed_at')[:5]
         recent_submissions = Submission.objects.filter(student=student).select_related('assignment__course').order_by('-submitted_at')[:5]
 
+        # Gamification integration
+        from apps.gamification.models import LearningStreak, Badge, StudentBadge, SkillProgress, LeaderboardRecord
+        from apps.gamification.utils import check_and_unlock_badges, recalculate_score
+
+        # Auto-check stats & recalculate score/badges
+        check_and_unlock_badges(student)
+        recalculate_score(student)
+
+        streak, _ = LearningStreak.objects.get_or_create(student=student)
+        
+        # Leaderboard ranking calculation
+        leaderboard_record, _ = LeaderboardRecord.objects.get_or_create(student=student)
+        user_rank = LeaderboardRecord.objects.filter(score__gt=leaderboard_record.score).count() + 1
+
+        unlocked_badges = StudentBadge.objects.filter(student=student).select_related('badge')
+        unlocked_badge_ids = unlocked_badges.values_list('badge_id', flat=True)
+        locked_badges = Badge.objects.exclude(id__in=unlocked_badge_ids)
+
+        skills = SkillProgress.objects.filter(student=student)
+
+        # Support Tickets count
+        from apps.support.models import SupportTicket
+        active_tickets_count = SupportTicket.objects.filter(student=student, status__in=['open', 'in_progress']).count()
+
         # Assemble context
         context.update({
             'role': 'student',
@@ -57,7 +81,18 @@ def dashboard_home(request):
             'pending_quizzes_list': pending_quizzes_qs,
             'certificates': certificates,
             'recent_results': recent_results,
-            'recent_submissions': recent_submissions
+            'recent_submissions': recent_submissions,
+            
+            # Gamification
+            'streak': streak,
+            'user_rank': user_rank,
+            'leaderboard_record': leaderboard_record,
+            'unlocked_badges': unlocked_badges,
+            'locked_badges': locked_badges,
+            'skills': skills,
+            
+            # Support
+            'active_tickets_count': active_tickets_count,
         })
         
     elif user.role == 'instructor' and hasattr(user, 'instructor_profile'):
@@ -165,8 +200,13 @@ def dashboard_home(request):
         activities.sort(key=lambda x: x['time'], reverse=True)
         recent_activities = activities[:8]
 
+        # Support stats for admin
+        from apps.support.models import SupportTicket
+        admin_open_tickets = SupportTicket.objects.filter(status__in=['open', 'in_progress']).count()
+
         context.update({
             'role': 'admin',
+            'admin_open_tickets': admin_open_tickets,
             'total_users': total_users,
             'total_students': total_students,
             'total_instructors': total_instructors,
