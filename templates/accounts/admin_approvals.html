@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Instructor Approvals - Learnify Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="text-white mb-1">Instructor Account Approvals</h2>
+            <p class="text-secondary mb-0">Review and approve registration requests from new educators.</p>
+        </div>
+        <div class="badge badge-custom badge-purple text-uppercase">
+            Admin Panel
+        </div>
+    </div>
+
+    <div class="card glass-card p-4">
+        {% if pending_instructors %}
+            <div class="table-responsive">
+                <table class="table table-premium align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Instructor</th>
+                            <th>Email Address</th>
+                            <th>Phone</th>
+                            <th>Specialization</th>
+                            <th>Requested On</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for instructor in pending_instructors %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        {% if instructor.user.profile_picture %}
+                                            <img src="{{ instructor.user.profile_picture.url }}" alt="Profile" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                <i class="bi bi-person text-secondary"></i>
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <div class="fw-bold text-white">{{ instructor.user.get_full_name|default:instructor.user.username }}</div>
+                                            <small class="text-muted">@{{ instructor.user.username }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ instructor.user.email }}</td>
+                                <td>{{ instructor.phone|default:"N/A" }}</td>
+                                <td><span class="badge badge-custom badge-purple">{{ instructor.specialization|default:"General" }}</span></td>
+                                <td>{{ instructor.user.date_joined|date:"M d, Y" }}</td>
+                                <td class="text-end">
+                                    <a href="{% url 'accounts:approve_instructor' instructor.pk %}" class="btn btn-premium btn-sm">
+                                        <i class="bi bi-check-circle me-1"></i>Approve Account
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 70px; height: 70px;">
+                    <i class="bi bi-check-all text-teal fs-2"></i>
+                </div>
+                <h5 class="text-white">All Caught Up!</h5>
+                <p class="text-secondary mb-0">There are no pending instructor accounts awaiting approval at this time.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Grade Assignments - Learnify Instructor{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header Block -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="text-white mb-1">Grade Assignments</h2>
+            <p class="text-secondary mb-0">Review student file submissions, award scores, and write detailed feedback.</p>
+        </div>
+    </div>
+
+    <!-- Courses and Assignments List -->
+    {% if courses %}
+        <div class="d-flex flex-column gap-5">
+            {% for course in courses %}
+                <div class="card glass-card p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-4 border-bottom border-default pb-3">
+                        <div>
+                            <h4 class="text-white mb-1">{{ course.title }}</h4>
+                            <span class="badge badge-custom badge-purple">{{ course.category.name }}</span>
+                        </div>
+                        <a href="{% url 'assignments:assignment_create' course.id %}" class="btn btn-premium btn-sm">
+                            <i class="bi bi-plus-lg me-1"></i>Add Assignment
+                        </a>
+                    </div>
+
+                    {% if course.assignments.all %}
+                        <div class="table-responsive">
+                            <table class="table table-premium align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Assignment Title</th>
+                                        <th>Due Date</th>
+                                        <th>Max Marks</th>
+                                        <th>Total Submissions</th>
+                                        <th>Pending Grading</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for assignment in course.assignments.all %}
+                                        <tr>
+                                            <td>
+                                                <span class="fw-bold text-white">{{ assignment.title }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="text-secondary" style="font-size: 0.85rem;">{{ assignment.due_date|date:"M d, Y - H:i" }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="text-secondary">{{ assignment.max_marks }} pts</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-custom badge-purple">{{ assignment.submissions.count }}</span>
+                                            </td>
+                                            <td>
+                                                {% if assignment.pending_submissions_count > 0 %}
+                                                    <span class="badge badge-custom badge-amber"><i class="bi bi-exclamation-circle me-1"></i>{{ assignment.pending_submissions_count }} Pending</span>
+                                                {% else %}
+                                                    <span class="badge badge-custom badge-teal"><i class="bi bi-check-circle me-1"></i>All Graded</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-end">
+                                                <a href="{% url 'assignments:assignment_submissions' assignment.id %}" class="btn btn-premium btn-sm">
+                                                    View Submissions
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4 text-secondary">
+                            <i class="bi bi-file-earmark-text fs-3 d-block mb-2 text-muted"></i>
+                            <span>No assignments created for this course yet.</span>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card glass-card p-5 text-center">
+            <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 70px; height: 70px;">
+                <i class="bi bi-journal-plus text-purple-accent fs-2"></i>
+            </div>
+            <h5 class="text-white">Create a Course First</h5>
+            <p class="text-secondary mb-4">You need to have published or draft courses before creating assignments.</p>
+            <a href="{% url 'courses:course_create' %}" class="btn btn-premium btn-sm">Create Course</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

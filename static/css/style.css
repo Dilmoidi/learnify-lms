@@ -1,0 +1,446 @@
+/* Learnify LMS - Modern Premium Dark SaaS Dashboard Theme */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* Base Colors */
+    --bg-page: #0e0c1a;
+    --bg-sidebar: #13102a;
+    --bg-card: #1c1836;
+    --border-default: #26215c;
+    --border-strong: #3c3489;
+    
+    /* Text Colors */
+    --text-primary: #eeedfe;
+    --text-secondary: #cecbf6;
+    --text-muted: #534ab7;
+    
+    /* Purple Theme (Brand & Nav) */
+    --purple-main: #534ab7;
+    --purple-accent: #7f77dd;
+    --purple-soft: #afa9ec;
+    
+    /* Teal Theme (Enrolled / Completed status) */
+    --teal-bg: #04342c;
+    --teal-border: #0f6e56;
+    --teal-main: #5dcaa5;
+    --teal-light: #9fe1cb;
+    
+    /* Amber Theme (Pending / Warning status) */
+    --amber-bg: #412402;
+    --amber-border: #854f0b;
+    --amber-main: #ef9f27;
+    --amber-light: #fac775;
+    
+    /* Pink Theme (Alerts / Activities) */
+    --pink-bg: #4b1528;
+    --pink-border: #993556;
+    --pink-main: #ed93b1;
+    --pink-light: #f4c0d1;
+    
+    /* Transitions */
+    --transition-speed: 0.3s;
+}
+
+/* Base Styles */
+body {
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    font-family: 'Outfit', sans-serif;
+    overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-page);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--border-default);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--border-strong);
+}
+
+/* Typography links */
+a {
+    color: var(--purple-soft);
+    text-decoration: none;
+    transition: color var(--transition-speed) ease;
+}
+a:hover {
+    color: var(--text-primary);
+}
+
+/* Layout Framework */
+#wrapper {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+}
+
+#sidebar {
+    min-width: 260px;
+    max-width: 260px;
+    background: var(--bg-sidebar);
+    color: var(--text-secondary);
+    min-height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    border-right: 1px solid var(--border-default);
+    transition: all var(--transition-speed) ease;
+}
+
+#content-wrapper {
+    width: calc(100% - 260px);
+    margin-left: 260px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.top-navbar {
+    background: rgba(19, 16, 42, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-default);
+    position: sticky;
+    top: 0;
+    z-index: 998;
+    padding: 15px 30px;
+}
+
+.main-content {
+    padding: 30px;
+    flex-grow: 1;
+}
+
+/* Sidebar styling */
+.sidebar-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid var(--border-default);
+}
+.sidebar-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.sidebar-logo span {
+    background: linear-gradient(135deg, var(--purple-accent), var(--teal-main));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.sidebar-menu {
+    list-style: none;
+    padding: 20px 0;
+    margin: 0;
+}
+.sidebar-menu li {
+    padding: 2px 15px;
+}
+.sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    color: var(--text-secondary);
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all var(--transition-speed) ease;
+}
+.sidebar-menu li a:hover,
+.sidebar-menu li.active a {
+    background: rgba(83, 74, 183, 0.15);
+    color: var(--text-primary);
+    border-left: 3px solid var(--purple-accent);
+}
+.sidebar-menu li a i {
+    font-size: 1.1rem;
+    color: var(--purple-accent);
+}
+
+/* Glassmorphism Styles */
+.glass-card {
+    background: rgba(28, 24, 54, 0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-default);
+    border-radius: 12px;
+    color: var(--text-primary);
+    transition: transform var(--transition-speed) ease, border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
+.glass-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--border-strong);
+    box-shadow: 0 10px 25px rgba(83, 74, 183, 0.15);
+}
+
+/* Premium Dashboard Color-Coded Cards */
+/* Teal Card (Enrolled / Completed) */
+.card-teal {
+    background: rgba(4, 52, 44, 0.55);
+    border: 1px solid var(--teal-border);
+}
+.card-teal:hover {
+    border-color: var(--teal-main);
+    box-shadow: 0 8px 20px rgba(93, 202, 165, 0.15);
+}
+.text-teal { color: var(--teal-main) !important; }
+.badge-teal {
+    background-color: var(--teal-bg);
+    color: var(--teal-main);
+    border: 1px solid var(--teal-border);
+}
+
+/* Amber Card (Pending / Warning) */
+.card-amber {
+    background: rgba(65, 36, 2, 0.55);
+    border: 1px solid var(--amber-border);
+}
+.card-amber:hover {
+    border-color: var(--amber-main);
+    box-shadow: 0 8px 20px rgba(239, 159, 39, 0.15);
+}
+.text-amber { color: var(--amber-main) !important; }
+.badge-amber {
+    background-color: var(--amber-bg);
+    color: var(--amber-main);
+    border: 1px solid var(--amber-border);
+}
+
+/* Pink Card (Alerts / Activities) */
+.card-pink {
+    background: rgba(75, 21, 40, 0.55);
+    border: 1px solid var(--pink-border);
+}
+.card-pink:hover {
+    border-color: var(--pink-main);
+    box-shadow: 0 8px 20px rgba(237, 147, 177, 0.15);
+}
+.text-pink { color: var(--pink-main) !important; }
+.badge-pink {
+    background-color: var(--pink-bg);
+    color: var(--pink-main);
+    border: 1px solid var(--pink-border);
+}
+
+/* Purple Card (Nav / Highlight) */
+.card-purple {
+    background: rgba(83, 74, 183, 0.15);
+    border: 1px solid var(--border-strong);
+}
+.card-purple:hover {
+    border-color: var(--purple-accent);
+    box-shadow: 0 8px 20px rgba(127, 119, 221, 0.2);
+}
+.text-purple { color: var(--purple-soft) !important; }
+.badge-purple {
+    background-color: rgba(83, 74, 183, 0.3);
+    color: var(--purple-soft);
+    border: 1px solid var(--border-strong);
+}
+
+/* Custom Premium Buttons */
+.btn-premium {
+    background: linear-gradient(135deg, var(--purple-main), var(--purple-accent));
+    border: none;
+    color: var(--text-primary);
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(83, 74, 183, 0.3);
+    transition: all var(--transition-speed) ease;
+}
+.btn-premium:hover {
+    background: linear-gradient(135deg, var(--purple-accent), var(--purple-soft));
+    color: var(--bg-page);
+    box-shadow: 0 6px 20px rgba(127, 119, 221, 0.5);
+    transform: translateY(-1px);
+}
+.btn-premium:active {
+    transform: translateY(0);
+}
+
+.btn-outline-premium {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: all var(--transition-speed) ease;
+}
+.btn-outline-premium:hover {
+    background: rgba(83, 74, 183, 0.2);
+    border-color: var(--purple-accent);
+    color: var(--text-primary);
+}
+
+/* Inputs and Forms Styling */
+.form-control, .form-select {
+    background-color: #13102a;
+    border: 1px solid var(--border-default);
+    color: var(--text-primary);
+    border-radius: 8px;
+    padding: 12px 16px;
+    transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
+.form-control:focus, .form-select:focus {
+    background-color: #1c1836;
+    border-color: var(--purple-accent);
+    box-shadow: 0 0 10px rgba(83, 74, 183, 0.35);
+    color: var(--text-primary);
+}
+.form-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+/* Custom Progress Bar */
+.progress-container {
+    background: var(--bg-page);
+    border-radius: 10px;
+    height: 8px;
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid var(--border-default);
+}
+.progress-bar-premium {
+    background: linear-gradient(90deg, var(--purple-main), var(--teal-main));
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease-in-out;
+}
+
+/* Table styling for dark theme */
+.table-premium {
+    color: var(--text-primary);
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+.table-premium th {
+    border: none;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    padding: 15px 20px;
+}
+.table-premium tbody tr {
+    background: rgba(28, 24, 54, 0.5);
+    border: 1px solid var(--border-default);
+    transition: all var(--transition-speed) ease;
+}
+.table-premium tbody tr:hover {
+    background: rgba(28, 24, 54, 0.85);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.table-premium tbody td {
+    padding: 15px 20px;
+    border-top: 1px solid var(--border-default);
+    border-bottom: 1px solid var(--border-default);
+}
+.table-premium tbody td:first-child {
+    border-left: 1px solid var(--border-default);
+    border-radius: 8px 0 0 8px;
+}
+.table-premium tbody td:last-child {
+    border-right: 1px solid var(--border-default);
+    border-radius: 0 8px 8px 0;
+}
+
+/* Badges styling */
+.badge-custom {
+    padding: 6px 12px;
+    font-weight: 600;
+    border-radius: 6px;
+    font-size: 0.75rem;
+}
+
+/* Discussion Forum Styling */
+.discussion-card {
+    border-left: 3px solid var(--purple-accent);
+}
+.reply-card {
+    border-left: 2px solid var(--border-strong);
+    background: rgba(19, 16, 42, 0.5);
+}
+
+/* Card label headers readability / Text muted overrides */
+.text-muted {
+    color: var(--text-secondary) !important;
+}
+.card-teal .text-muted {
+    color: var(--teal-light) !important;
+    opacity: 0.9;
+}
+.card-amber .text-muted {
+    color: var(--amber-light) !important;
+    opacity: 0.9;
+}
+.card-pink .text-muted {
+    color: var(--pink-light) !important;
+    opacity: 0.9;
+}
+.card-purple .text-muted {
+    color: var(--purple-soft) !important;
+    opacity: 0.9;
+}
+
+/* List Group Item override for Premium Dark Theme */
+.list-group-item {
+    background-color: rgba(19, 16, 42, 0.6) !important;
+    border: 1px solid var(--border-default) !important;
+    color: var(--text-primary) !important;
+    transition: all var(--transition-speed) ease;
+}
+.list-group-item a {
+    color: var(--text-primary) !important;
+}
+.list-group-item a:hover {
+    color: var(--purple-soft) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+    #sidebar {
+        margin-left: -260px;
+    }
+    #sidebar.active {
+        margin-left: 0;
+    }
+    #content-wrapper {
+        width: 100%;
+        margin-left: 0;
+    }
+}
+
+/* Custom Pill Tabs for Dark SaaS UI */
+.custom-pills .nav-link {
+    color: var(--text-secondary) !important;
+    background: rgba(19, 16, 42, 0.4);
+    border: 1px solid var(--border-default);
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all var(--transition-speed) ease;
+}
+.custom-pills .nav-link:hover {
+    color: var(--text-primary) !important;
+    border-color: var(--border-strong);
+}
+.custom-pills .nav-link.active {
+    color: var(--text-primary) !important;
+    background: linear-gradient(135deg, var(--purple-main), var(--purple-accent)) !important;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(83, 74, 183, 0.25);
+}

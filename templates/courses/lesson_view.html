@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ lesson.title }} - {{ course.title }} - Learnify{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="row g-4">
+        <!-- Sidebar Syllabus Navigation (Scrollable list of lessons) -->
+        <div class="col-lg-4 order-lg-2">
+            <div class="card glass-card p-4 h-100" style="max-height: calc(100vh - 120px); overflow-y: auto;">
+                <h5 class="text-white mb-3">
+                    <i class="bi bi-book-half text-purple-accent me-2"></i>Course Syllabus
+                </h5>
+                <p class="text-secondary mb-3" style="font-size: 0.85rem;">{{ course.title }}</p>
+                
+                <div class="list-group d-flex flex-column gap-2">
+                    {% for item in syllabus_progress %}
+                        <a href="{% url 'courses:lesson_view' course.slug item.lesson.id %}" class="list-group-item bg-sidebar border-default p-3 rounded d-flex align-items-center justify-content-between {% if item.lesson.id == lesson.id %}active-lesson{% endif %}" style="transition: all 0.3s ease;">
+                            <div class="d-flex align-items-center gap-2 overflow-hidden">
+                                <span class="fw-bold {% if item.lesson.id == lesson.id %}text-purple-accent{% else %}text-muted{% endif %}" style="font-size: 0.85rem;">
+                                    {{ forloop.counter }}.
+                                </span>
+                                <span class="text-white text-truncate" style="font-size: 0.85rem;">{{ item.lesson.title }}</span>
+                            </div>
+                            
+                            <div>
+                                {% if item.completed %}
+                                    <i class="bi bi-check-circle-fill text-teal"></i>
+                                {% else %}
+                                    <i class="bi bi-circle text-muted" style="font-size: 0.9rem;"></i>
+                                {% endif %}
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Lesson Content Area (Video player and materials) -->
+        <div class="col-lg-8 order-lg-1">
+            <div class="card glass-card p-4">
+                <a href="{% url 'courses:course_detail' course.slug %}" class="btn btn-outline-premium btn-sm mb-3">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Course Info
+                </a>
+                
+                <!-- Title -->
+                <h3 class="text-white mb-2">{{ lesson.title }}</h3>
+                <hr style="border-color: var(--border-default);">
+                
+                <!-- Video Player Section -->
+                <div class="mb-4">
+                    {% if lesson.video_file %}
+                        <div class="ratio ratio-16x9 rounded overflow-hidden border border-default" style="background-color: #000;">
+                            <video controls class="w-100 h-100">
+                                <source src="{{ lesson.video_file.url }}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    {% elif lesson.video_url %}
+                        <div class="ratio ratio-16x9 rounded overflow-hidden border border-default" style="background-color: #000;">
+                            <!-- Check if youtube embed is configured -->
+                            <iframe src="{{ lesson.video_url }}" title="{{ lesson.title }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen class="w-100 h-100"></iframe>
+                        </div>
+                    {% else %}
+                        <div class="ratio ratio-16x9 rounded overflow-hidden border border-default d-flex flex-column align-items-center justify-content-center text-muted" style="background-color: var(--bg-sidebar);">
+                            <i class="bi bi-play-circle fs-1 mb-2 text-purple-accent"></i>
+                            <span style="font-size: 0.9rem;">This lesson does not contain a video demonstration.</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Control actions (Completion Toggles / Resource Downloads) -->
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 p-3 rounded bg-sidebar border-default mb-4">
+                    <div>
+                        {% if enrollment and user.role == 'student' %}
+                            <a href="{% url 'courses:mark_lesson_completed' course.slug lesson.id %}" class="btn btn-sm {% if lesson_progress.is_completed %}btn-outline-premium{% else %}btn-premium{% endif %}">
+                                {% if lesson_progress.is_completed %}
+                                    <i class="bi bi-x-circle me-1"></i>Mark Incomplete
+                                {% else %}
+                                    <i class="bi bi-check-circle me-1"></i>Mark Completed
+                                {% endif %}
+                            </a>
+                        {% else %}
+                            <span class="badge badge-custom badge-purple"><i class="bi bi-shield-lock me-1"></i>Syllabus Preview Mode</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        {% if lesson.pdf_notes %}
+                            <a href="{{ lesson.pdf_notes.url }}" target="_blank" class="btn btn-outline-premium btn-sm text-teal" style="border-color: var(--teal-border); color: var(--teal-main);">
+                                <i class="bi bi-file-earmark-pdf me-1"></i>Download PDF Notes
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Description / Text details -->
+                <h5 class="text-white mb-2">Lesson Description</h5>
+                <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">
+                    {{ lesson.description|linebreaksbr }}
+                </p>
+
+                <!-- Navigation buttons (Prev/Next) -->
+                <div class="d-flex align-items-center justify-content-between border-top border-default pt-4 mt-4">
+                    {% if prev_lesson %}
+                        <a href="{% url 'courses:lesson_view' course.slug prev_lesson.id %}" class="btn btn-outline-premium">
+                            <i class="bi bi-arrow-left me-1"></i>Previous Lesson
+                        </a>
+                    {% else %}
+                        <button class="btn btn-outline-premium" disabled>
+                            <i class="bi bi-arrow-left me-1"></i>Start of Course
+                        </button>
+                    {% endif %}
+
+                    {% if next_lesson %}
+                        <a href="{% url 'courses:lesson_view' course.slug next_lesson.id %}" class="btn btn-premium">
+                            Next Lesson<i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'courses:course_detail' course.slug %}" class="btn btn-premium btn-teal" style="background: linear-gradient(135deg, var(--teal-border), var(--teal-main)); color: var(--bg-page); box-shadow: 0 4px 15px rgba(93, 202, 165, 0.3);">
+                            Complete Syllabus<i class="bi bi-check2-all ms-1"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Styling active state for syllabus sidebar list item */
+    .active-lesson {
+        border-color: var(--purple-accent) !important;
+        background: rgba(83, 74, 183, 0.15) !important;
+    }
+</style>
+{% endblock %}

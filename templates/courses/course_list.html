@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Browse Courses - Learnify LMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header Area -->
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+        <div>
+            <h2 class="text-white mb-1">Explore Courses</h2>
+            <p class="text-secondary mb-0">Expand your skills with our instructor-led learning programs.</p>
+        </div>
+        
+        <!-- Mobile Search (Hidden on Top Nav but visible here on mobile) -->
+        <div class="d-md-none w-100">
+            <form action="{% url 'courses:course_list' %}" method="get">
+                <div class="input-group">
+                    <span class="input-group-text bg-sidebar border-default text-muted">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" name="search" class="form-control bg-sidebar border-default text-primary" placeholder="Search courses..." value="{{ search_query|default:'' }}">
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Selector Navigation -->
+    <div class="mb-4">
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'courses:course_list' %}{% if search_query %}?search={{ search_query }}{% endif %}" class="btn {% if not selected_category %}btn-premium{% else %}btn-outline-premium{% endif %} btn-sm">
+                All Categories
+            </a>
+            {% for cat in categories %}
+                <a href="{% url 'courses:course_list' %}?category={{ cat.slug }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn {% if selected_category == cat.slug %}btn-premium{% else %}btn-outline-premium{% endif %} btn-sm d-flex align-items-center gap-2">
+                    <i class="bi {{ cat.icon|default:'bi-tag' }}"></i>
+                    {{ cat.name }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Course Cards Grid -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+        {% for course in courses %}
+            <div class="col">
+                <div class="card glass-card h-100 overflow-hidden">
+                    <!-- Thumbnail -->
+                    <div style="height: 180px; overflow: hidden; background-color: var(--bg-sidebar); position: relative;">
+                        {% if course.thumbnail %}
+                            <img src="{{ course.thumbnail.url }}" alt="{{ course.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-muted">
+                                <i class="bi bi-journal-code fs-1 text-purple-accent mb-2"></i>
+                                <span style="font-size: 0.85rem;">No Thumbnail Provided</span>
+                            </div>
+                        {% endif %}
+                        <span class="badge badge-custom badge-purple position-absolute top-3 start-3" style="position: absolute; top: 15px; left: 15px; z-index: 2;">
+                            {{ course.category.name }}
+                        </span>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="card-body p-4 d-flex flex-column justify-content-between">
+                        <div>
+                            <h5 class="card-title text-white mb-2 text-truncate-2" style="font-size: 1.1rem; line-height: 1.4; height: 3rem; overflow: hidden;">
+                                {{ course.title }}
+                            </h5>
+                            
+                            <p class="text-secondary mb-3 text-truncate-3" style="font-size: 0.85rem; height: 3.6rem; overflow: hidden;">
+                                {{ course.description }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <div class="d-flex align-items-center justify-content-between mb-3 text-secondary" style="font-size: 0.8rem;">
+                                <div class="d-flex align-items-center gap-1">
+                                    <i class="bi bi-person text-purple-accent"></i>
+                                    <span>{{ course.instructor.user.get_full_name|default:course.instructor.user.username }}</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-1">
+                                    <i class="bi bi-play-circle text-teal"></i>
+                                    <span>{{ course.lessons.count }} Lessons</span>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex align-items-center justify-content-between pt-3 border-top border-default">
+                                <div class="d-flex align-items-center gap-1">
+                                    <i class="bi bi-star-fill text-amber"></i>
+                                    <span class="text-white fw-bold" style="font-size: 0.9rem;">{{ course.average_rating }}</span>
+                                    <span class="text-muted" style="font-size: 0.8rem;">({{ course.reviews.count }})</span>
+                                </div>
+                                
+                                <a href="{% url 'courses:course_detail' course.slug %}" class="btn btn-premium btn-sm px-3">
+                                    View Course
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 py-5 text-center">
+                <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 70px; height: 70px;">
+                    <i class="bi bi-search text-pink fs-2"></i>
+                </div>
+                <h5 class="text-white">No Courses Found</h5>
+                <p class="text-secondary">Try refining your search terms or selecting another category filter.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+        <div class="d-flex justify-content-center mt-5">
+            <nav aria-label="Course list pagination">
+                <ul class="pagination gap-2 border-0">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="btn btn-outline-premium btn-sm" href="?page={{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    <li class="page-item d-flex align-items-center px-3 text-secondary" style="font-size: 0.9rem;">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </li>
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="btn btn-outline-premium btn-sm" href="?page={{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

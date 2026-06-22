@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Edit Assignment{% else %}Create Assignment{% endif %} - Learnify{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <a href="{% url 'courses:course_detail' course.slug %}" class="btn btn-outline-premium btn-sm mb-4">
+        <i class="bi bi-arrow-left me-1"></i>Back to Course
+    </a>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card glass-card p-4">
+                <h4 class="text-white mb-4">
+                    <i class="bi bi-file-earmark-plus text-purple me-2"></i>
+                    {% if object %}Modify Assignment Settings{% else %}Add New Assignment{% endif %}
+                </h4>
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="id_title" class="form-label">Assignment Title</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.title.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label for="id_max_marks" class="form-label">Maximum Marks</label>
+                            {{ form.max_marks }}
+                            {% if form.max_marks.errors %}
+                                <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.max_marks.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_due_date" class="form-label">Due Date & Time</label>
+                            {{ form.due_date }}
+                            {% if form.due_date.errors %}
+                                <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.due_date.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_description" class="form-label">Assignment Description / Task instructions</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_attachment" class="form-label">Downloadable Attachment File (Optional)</label>
+                        {{ form.attachment }}
+                        {% if form.attachment.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.attachment.errors }}</div>
+                        {% endif %}
+                        {% if object.attachment %}
+                            <small class="text-muted d-block mt-1">Current: <a href="{{ object.attachment.url }}" target="_blank">{{ object.attachment.name }}</a></small>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="btn btn-premium w-100">
+                        {% if object %}Save Assignment Settings{% else %}Create Course Assignment{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

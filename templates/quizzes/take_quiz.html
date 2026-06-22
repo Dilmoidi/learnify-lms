@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Quiz: {{ quiz.title }} - Learnify{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <!-- Header -->
+            <div class="card glass-card p-4 mb-4">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="badge badge-custom badge-purple text-uppercase">Evaluation</span>
+                    <span class="text-amber fw-bold" style="font-size: 0.9rem;">
+                        <i class="bi bi-flag-fill me-1"></i>Passing Score: {{ quiz.pass_percentage }}%
+                    </span>
+                </div>
+                
+                <h3 class="text-white mb-2">{{ quiz.title }}</h3>
+                <p class="text-secondary mb-0">{{ quiz.description }}</p>
+            </div>
+
+            <!-- Quiz form -->
+            <form method="post">
+                {% csrf_token %}
+                
+                {% for question in questions %}
+                    <div class="card glass-card p-4 mb-4">
+                        <h5 class="text-white mb-3 d-flex gap-2">
+                            <span class="text-purple-accent">{{ forloop.counter }}.</span>
+                            <span>{{ question.question_text }}</span>
+                        </h5>
+                        
+                        <div class="d-flex flex-column gap-3 mt-3">
+                            <!-- Option 1 -->
+                            <label class="form-check-label p-3 rounded bg-sidebar border-default d-flex align-items-center gap-3 option-label" style="cursor: pointer; transition: all 0.3s ease;">
+                                <input class="form-check-input text-purple" type="radio" name="question_{{ question.id }}" value="1" required>
+                                <span class="text-secondary">{{ question.option_1 }}</span>
+                            </label>
+                            
+                            <!-- Option 2 -->
+                            <label class="form-check-label p-3 rounded bg-sidebar border-default d-flex align-items-center gap-3 option-label" style="cursor: pointer; transition: all 0.3s ease;">
+                                <input class="form-check-input text-purple" type="radio" name="question_{{ question.id }}" value="2">
+                                <span class="text-secondary">{{ question.option_2 }}</span>
+                            </label>
+
+                            <!-- Option 3 -->
+                            <label class="form-check-label p-3 rounded bg-sidebar border-default d-flex align-items-center gap-3 option-label" style="cursor: pointer; transition: all 0.3s ease;">
+                                <input class="form-check-input text-purple" type="radio" name="question_{{ question.id }}" value="3">
+                                <span class="text-secondary">{{ question.option_3 }}</span>
+                            </label>
+
+                            <!-- Option 4 -->
+                            <label class="form-check-label p-3 rounded bg-sidebar border-default d-flex align-items-center gap-3 option-label" style="cursor: pointer; transition: all 0.3s ease;">
+                                <input class="form-check-input text-purple" type="radio" name="question_{{ question.id }}" value="4">
+                                <span class="text-secondary">{{ question.option_4 }}</span>
+                            </label>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                <div class="d-flex justify-content-between mb-5">
+                    <a href="{% url 'courses:course_detail' course.slug %}" class="btn btn-outline-premium">
+                        <i class="bi bi-x-circle me-1"></i>Cancel & Return
+                    </a>
+                    <button type="submit" class="btn btn-premium px-5">
+                        <i class="bi bi-send-check me-1"></i>Submit Quiz Answers
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Styling active state for custom options checks */
+    .option-label:hover {
+        border-color: var(--border-strong) !important;
+        background: rgba(19, 16, 42, 0.8) !important;
+    }
+    .option-label input:checked + span {
+        color: var(--text-primary) !important;
+        font-weight: 500;
+    }
+    .option-label input:checked {
+        background-color: var(--purple-main) !important;
+        border-color: var(--purple-accent) !important;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,811 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Learnify LMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="text-white mb-1">Welcome back, {{ user.get_full_name|default:user.username }}!</h2>
+            <p class="text-secondary mb-0">Here is what's happening on your learning platform today.</p>
+        </div>
+        <span class="badge badge-custom {% if user.role == 'student' %}badge-teal{% elif user.role == 'instructor' %}badge-amber{% else %}badge-purple{% endif %} text-uppercase">
+            {{ user.role }} Mode
+        </span>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- STUDENT DASHBOARD -->
+    <!-- ========================================== -->
+    {% if role == 'student' %}
+        <!-- Color Coded Cards -->
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-5">
+            <!-- Teal: Enrolled Courses -->
+            <div class="col">
+                <div class="card glass-card card-teal p-3 h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted d-block" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">Enrolled Courses</span>
+                            <span class="fs-2 fw-bold text-white">{{ total_enrolled }}</span>
+                        </div>
+                        <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                            <i class="bi bi-journal-bookmark text-teal fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teal: Completed Courses -->
+            <div class="col">
+                <div class="card glass-card card-teal p-3 h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted d-block" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">Completed Courses</span>
+                            <span class="fs-2 fw-bold text-white">{{ completed_courses }}</span>
+                        </div>
+                        <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                            <i class="bi bi-bookmark-check text-teal fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Amber: Pending Assignments -->
+            <div class="col">
+                <div class="card glass-card card-amber p-3 h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted d-block" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">Pending Tasks</span>
+                            <span class="fs-2 fw-bold text-white">{{ pending_assignments }}</span>
+                        </div>
+                        <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                            <i class="bi bi-file-earmark-text text-amber fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Amber: Upcoming Quizzes -->
+            <div class="col">
+                <div class="card glass-card card-amber p-3 h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted d-block" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">Pending Quizzes</span>
+                            <span class="fs-2 fw-bold text-white">{{ pending_quizzes }}</span>
+                        </div>
+                        <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                            <i class="bi bi-patch-question text-amber fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Side: Enrolled Courses List -->
+            <div class="col-xl-8">
+                <div class="card glass-card p-4">
+                    <h4 class="text-white mb-4"><i class="bi bi-mortarboard text-purple me-2"></i>My Learning Progress</h4>
+                    
+                    {% if enrollments %}
+                        <div class="d-flex flex-column gap-3">
+                            {% for enrollment in enrollments %}
+                                <div class="p-3 bg-sidebar border border-default rounded d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                                    <div class="overflow-hidden">
+                                        <h5 class="text-white mb-1 text-truncate">{{ enrollment.course.title }}</h5>
+                                        <small class="text-muted">Instructor: {{ enrollment.course.instructor.user.get_full_name|default:enrollment.course.instructor.user.username }}</small>
+                                    </div>
+                                    
+                                    <div class="d-flex align-items-center gap-4 min-w-200">
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between mb-1 text-secondary" style="font-size: 0.75rem;">
+                                                <span>Progress</span>
+                                                <span class="fw-bold">{{ enrollment.progress_percentage }}%</span>
+                                            </div>
+                                            <div class="progress-container" style="height: 6px;">
+                                                <div class="progress-bar-premium" style="width: {{ enrollment.progress_percentage }}%;"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <a href="{% url 'courses:course_detail' enrollment.course.slug %}" class="btn btn-premium btn-sm">
+                                            Open Course
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 text-secondary">
+                            <i class="bi bi-journals fs-1 d-block mb-2 text-muted"></i>
+                            <span>You haven't enrolled in any courses yet.</span>
+                            <a href="{% url 'courses:course_list' %}" class="btn btn-premium btn-sm mt-3 d-inline-block">Browse Catalog</a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Pending Tasks & Quizzes (Amber Card) -->
+                <div class="card glass-card card-amber p-4 mt-4">
+                    <h4 class="text-white mb-4"><i class="bi bi-exclamation-circle text-amber me-2"></i>Pending Tasks & Quizzes</h4>
+                    
+                    {% if pending_assignments_list or pending_quizzes_list %}
+                        <div class="d-flex flex-column gap-3">
+                            <!-- Pending Assignments -->
+                            {% for assignment in pending_assignments_list %}
+                                <div class="p-3 bg-sidebar border border-default rounded d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                                    <div>
+                                        <span class="badge badge-custom badge-amber mb-1">ASSIGNMENT</span>
+                                        <h5 class="text-white mb-1">{{ assignment.title }}</h5>
+                                        <small class="text-muted">Course: {{ assignment.course.title }} | Due: {{ assignment.due_date|date:"M d, Y - H:i" }}</small>
+                                    </div>
+                                    <a href="{% url 'assignments:submit_assignment' assignment.id %}" class="btn btn-premium btn-sm">
+                                        Do Assignment
+                                    </a>
+                                </div>
+                            {% endfor %}
+                            
+                            <!-- Pending Quizzes -->
+                            {% for quiz in pending_quizzes_list %}
+                                <div class="p-3 bg-sidebar border border-default rounded d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                                    <div>
+                                        <span class="badge badge-custom badge-purple mb-1">QUIZ</span>
+                                        <h5 class="text-white mb-1">{{ quiz.title }}</h5>
+                                        <small class="text-muted">Course: {{ quiz.course.title }}</small>
+                                    </div>
+                                    <a href="{% url 'quizzes:take_quiz' quiz.course.slug quiz.id %}" class="btn btn-premium btn-sm">
+                                        Take Quiz
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4 text-secondary">
+                            <i class="bi bi-check2-circle fs-2 d-block mb-2 text-teal"></i>
+                            <span>You are all caught up! No pending tasks or quizzes.</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Right Side: Certificates & Activities -->
+            <div class="col-xl-4">
+                <!-- Certificates Card (Pink) -->
+                <div class="card glass-card card-pink p-4 mb-4">
+                    <h5 class="text-white mb-3"><i class="bi bi-award-fill text-pink me-2"></i>Earned Certificates</h5>
+                    {% if certificates %}
+                        <div class="d-flex flex-column gap-2">
+                            {% for cert in certificates %}
+                                <div class="p-2 bg-sidebar border-default rounded d-flex align-items-center justify-content-between" style="font-size: 0.85rem;">
+                                    <span class="text-white text-truncate me-2">{{ cert.course.title }}</span>
+                                    <a href="{% url 'certificates:download_certificate' cert.certificate_uuid %}" class="btn btn-premium btn-sm p-1 px-2" style="font-size: 0.75rem;"><i class="bi bi-download"></i></a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <small class="text-muted d-block py-2">Complete a course syllabus to 100% progress to earn completion certificates.</small>
+                    {% endif %}
+                </div>
+
+                <!-- Recent Activities (Pink) -->
+                <div class="card glass-card card-pink p-4">
+                    <h5 class="text-white mb-3"><i class="bi bi-clock-history text-pink me-2"></i>Recent Attempts</h5>
+                    
+                    {% if recent_results %}
+                        <div class="d-flex flex-column gap-3">
+                            {% for res in recent_results %}
+                                <div style="font-size: 0.85rem;" class="border-bottom border-default pb-2 last-border-none">
+                                    <div class="d-flex justify-content-between text-white mb-1">
+                                        <span class="fw-bold">{{ res.quiz.title }}</span>
+                                        <span class="{% if res.passed %}text-teal{% else %}text-pink{% endif %} fw-bold">{{ res.percentage }}%</span>
+                                    </div>
+                                    <small class="text-muted">{{ res.quiz.course.title }} | Passed: {{ res.passed }}</small>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <small class="text-muted">No recent quiz or assignment submissions recorded.</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    <!-- ========================================== -->
+    <!-- INSTRUCTOR DASHBOARD -->
+    <!-- ========================================== -->
+    {% elif role == 'instructor' %}
+        <!-- Color Coded Cards -->
+        <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+            <!-- Purple: Total Courses -->
+            <div class="col">
+                <div class="card glass-card card-purple p-3 h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted d-block" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">My Courses</span>
+                            <span class="fs-2 fw-bold text-white">{{ total_courses }}</span>
+                        </div>
+                        <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                            <i class="bi bi-book text-purple-accent fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teal: Total Students -->
+            <div class="col">
+                <div class="card glass-card card-teal p-3 h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted d-block" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">Total Students</span>
+                            <span class="fs-2 fw-bold text-white">{{ total_students }}</span>
+                        </div>
+                        <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                            <i class="bi bi-people text-teal fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Amber: Pending Grading -->
+            <div class="col">
+                <div class="card glass-card card-amber p-3 h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted d-block" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">Pending Grading</span>
+                            <span class="fs-2 fw-bold text-white">{{ pending_grading }}</span>
+                        </div>
+                        <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                            <i class="bi bi-file-earmark-check text-amber fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Side: Recent Submissions to Grade -->
+            <div class="col-xl-8">
+                <div class="card glass-card p-4">
+                    <h4 class="text-white mb-4"><i class="bi bi-clipboard-check text-purple me-2"></i>Assignments to Grade</h4>
+                    
+                    {% if recent_submissions %}
+                        <div class="table-responsive">
+                            <table class="table table-premium align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Assignment</th>
+                                        <th>Submitted Date</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for sub in recent_submissions %}
+                                        <tr>
+                                            <td>{{ sub.student.user.get_full_name|default:sub.student.user.username }}</td>
+                                            <td>{{ sub.assignment.title }}</td>
+                                            <td>{{ sub.submitted_at|date:"M d, H:i" }}</td>
+                                            <td>
+                                                <span class="badge badge-custom {% if sub.status == 'graded' %}badge-teal{% else %}badge-amber{% endif %} text-uppercase">
+                                                    {{ sub.status }}
+                                                </span>
+                                            </td>
+                                            <td class="text-end">
+                                                <a href="{% url 'assignments:grade_submission' sub.id %}" class="btn btn-premium btn-sm">
+                                                    Grade
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4 text-secondary">
+                            <i class="bi bi-check2-circle fs-2 d-block mb-2 text-teal"></i>
+                            <span>All student submissions have been successfully graded!</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Right Side: Recent Feedback / Reviews -->
+            <div class="col-xl-4">
+                <div class="card glass-card card-pink p-4">
+                    <h5 class="text-white mb-3"><i class="bi bi-chat-square-heart-fill text-pink me-2"></i>Recent Course Reviews</h5>
+                    
+                    {% if recent_reviews %}
+                        <div class="d-flex flex-column gap-3">
+                            {% for rev in recent_reviews %}
+                                <div style="font-size: 0.85rem;" class="border-bottom border-default pb-2">
+                                    <div class="d-flex justify-content-between text-white mb-1">
+                                        <span class="fw-bold">@{{ rev.student.user.username }}</span>
+                                        <span class="text-amber"><i class="bi bi-star-fill me-1"></i>{{ rev.rating }}</span>
+                                    </div>
+                                    <p class="text-secondary mb-1" style="font-size: 0.8rem;">{{ rev.comment|truncatechars:80 }}</p>
+                                    <small class="text-muted d-block">Course: {{ rev.course.title }}</small>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <small class="text-muted">No student reviews submitted for your courses yet.</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    <!-- ========================================== -->
+    <!-- ADMIN DASHBOARD -->
+    <!-- ========================================== -->
+    {% elif role == 'admin' %}
+        <!-- Color Coded Cards -->
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-5">
+            <!-- Teal: Total Users -->
+            <div class="col">
+                <div class="card glass-card card-teal p-3 h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted d-block" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">Total Users</span>
+                            <span class="fs-2 fw-bold text-white">{{ total_users }}</span>
+                        </div>
+                        <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                            <i class="bi bi-people-fill text-teal fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teal: Students Count -->
+            <div class="col">
+                <div class="card glass-card card-teal p-3 h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted d-block" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">Students</span>
+                            <span class="fs-2 fw-bold text-white">{{ total_students }}</span>
+                        </div>
+                        <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                            <i class="bi bi-mortarboard text-teal fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Purple: Instructors Count -->
+            <div class="col">
+                <div class="card glass-card card-purple p-3 h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted d-block" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">Instructors</span>
+                            <span class="fs-2 fw-bold text-white">{{ total_instructors }}</span>
+                        </div>
+                        <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                            <i class="bi bi-person-workspace text-purple-accent fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Purple: Courses Count -->
+            <div class="col">
+                <div class="card glass-card card-purple p-3 h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted d-block" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">Total Courses</span>
+                            <span class="fs-2 fw-bold text-white">{{ total_courses }}</span>
+                        </div>
+                        <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                            <i class="bi bi-journal-text text-purple-accent fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Quick Actions -->
+        <div class="card glass-card card-purple p-4 mb-4">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                <div>
+                    <h5 class="text-white mb-1"><i class="bi bi-file-earmark-spreadsheet text-purple-accent me-2"></i>Download Reports</h5>
+                    <p class="text-secondary mb-0" style="font-size: 0.85rem;">Export CSV spreadsheets of all platform courses, users, and instructor records.</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'admin_export_courses_csv' %}" class="btn btn-premium btn-sm d-flex align-items-center gap-2">
+                        <i class="bi bi-download"></i> Courses CSV
+                    </a>
+                    <a href="{% url 'admin_export_users_csv' %}" class="btn btn-outline-premium btn-sm d-flex align-items-center gap-2">
+                        <i class="bi bi-download"></i> Users CSV
+                    </a>
+                    <a href="{% url 'admin_export_instructors_csv' %}" class="btn btn-outline-premium btn-sm d-flex align-items-center gap-2">
+                        <i class="bi bi-download"></i> Instructors CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Charts Grid -->
+        <div class="row g-4 mb-5">
+            <!-- Daily Enrollments Line Chart -->
+            <div class="col-xl-7">
+                <div class="card glass-card p-4 h-100">
+                    <h5 class="text-white mb-4"><i class="bi bi-graph-up-arrow text-purple me-2"></i>Daily Enrollments (Last 7 Days)</h5>
+                    <div style="position: relative; height: 350px;">
+                        <canvas id="enrollmentsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Category and Course Popularity Charts -->
+            <div class="col-xl-5">
+                <div class="d-flex flex-column gap-4 h-100">
+                    <!-- Category Distribution Doughnut -->
+                    <div class="card glass-card p-4 flex-grow-1">
+                        <h5 class="text-white mb-3"><i class="bi bi-pie-chart text-teal me-2"></i>Course Categories</h5>
+                        <div style="position: relative; height: 140px;">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Course Popularity Rankings Bar Chart -->
+                    <div class="card glass-card p-4 flex-grow-1">
+                        <h5 class="text-white mb-3"><i class="bi bi-bar-chart-steps text-amber me-2"></i>Course Popularity (Top 5)</h5>
+                        <div style="position: relative; height: 140px;">
+                            <canvas id="popularityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Side: Pending/All Instructors (Amber) -->
+            <div class="col-xl-7">
+                <div class="card glass-card card-amber p-4 h-100">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+                        <h4 class="text-white mb-0"><i class="bi bi-person-workspace text-amber me-2"></i>Instructors Panel</h4>
+                        
+                        <ul class="nav nav-pills custom-pills" id="instructorTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active btn-sm" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" aria-controls="pending" aria-selected="true" style="font-size: 0.8rem; padding: 5px 12px;">
+                                    Pending ({{ pending_instructors.count }})
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link btn-sm" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="false" style="font-size: 0.8rem; padding: 5px 12px;">
+                                    All ({{ all_instructors.count }})
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tab-content" id="instructorTabContent">
+                        <div class="tab-pane fade show active" id="pending" role="tabpanel" aria-labelledby="pending-tab">
+                            {% if pending_instructors %}
+                                <div class="table-responsive">
+                                    <table class="table table-premium align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Specialization</th>
+                                                <th class="text-end">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for inst in pending_instructors %}
+                                                <tr>
+                                                    <td>
+                                                        <div class="fw-bold text-white">{{ inst.user.get_full_name|default:inst.user.username }}</div>
+                                                        <small class="text-muted">@{{ inst.user.username }}</small>
+                                                    </td>
+                                                    <td>{{ inst.specialization|default:"N/A" }}</td>
+                                                    <td class="text-end">
+                                                        <a href="{% url 'accounts:approve_instructor' inst.pk %}" class="btn btn-premium btn-sm" style="font-size: 0.75rem;">
+                                                            Approve
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5 text-secondary">
+                                    <i class="bi bi-check2-all fs-2 d-block mb-2 text-teal"></i>
+                                    <span>All instructor accounts have been approved.</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="tab-pane fade" id="all" role="tabpanel" aria-labelledby="all-tab">
+                            {% if all_instructors %}
+                                <div class="table-responsive">
+                                    <table class="table table-premium align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Instructor</th>
+                                                <th>Specialization</th>
+                                                <th>Status</th>
+                                                <th class="text-end">Courses</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for inst in all_instructors %}
+                                                <tr>
+                                                    <td>
+                                                        <div class="fw-bold text-white">{{ inst.user.get_full_name|default:inst.user.username }}</div>
+                                                        <small class="text-muted">{{ inst.user.email }}</small>
+                                                    </td>
+                                                    <td>{{ inst.specialization|default:"N/A" }}</td>
+                                                    <td>
+                                                        <span class="badge badge-custom {% if inst.is_approved %}badge-teal{% else %}badge-amber{% endif %} text-uppercase">
+                                                            {% if inst.is_approved %}Active{% else %}Pending{% endif %}
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-end fw-bold text-white">
+                                                        {{ inst.courses.count }}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5 text-secondary">
+                                    <i class="bi bi-people fs-2 d-block mb-2 text-muted"></i>
+                                    <span>No registered instructors found.</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: System Activities Log (Pink) -->
+            <div class="col-xl-5">
+                <div class="card glass-card card-pink p-4 h-100">
+                    <h5 class="text-white mb-3"><i class="bi bi-activity text-pink me-2"></i>System Activities</h5>
+                    
+                    {% if recent_activities %}
+                        <div class="d-flex flex-column gap-3">
+                            {% for act in recent_activities %}
+                                <div style="font-size: 0.85rem;" class="border-bottom border-default pb-2 d-flex align-items-start gap-3 last-border-none">
+                                    <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;">
+                                        <i class="bi {{ act.icon }}"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <span class="text-white d-block">{{ act.text }}</span>
+                                        <small class="text-muted" style="font-size: 0.75rem;">{{ act.time|date:"M d, Y - H:i" }}</small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <small class="text-muted">No recent system activities recorded.</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if role == 'admin' %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Chart.js default font configuration for Outfit
+        Chart.defaults.font.family = "'Outfit', sans-serif";
+        Chart.defaults.color = '#cecbf6'; // var(--text-secondary)
+        
+        // Custom Theme Colors matching CSS variables
+        const colors = {
+            purple: {
+                main: '#534ab7',
+                accent: '#7f77dd',
+                soft: '#afa9ec'
+            },
+            teal: {
+                main: '#5dcaa5',
+                light: '#9fe1cb',
+                bg: '#04342c'
+            },
+            amber: {
+                main: '#ef9f27',
+                light: '#fac775',
+                bg: '#412402'
+            },
+            pink: {
+                main: '#ed93b1',
+                light: '#f4c0d1',
+                bg: '#4b1528'
+            },
+            border: '#26215c', // var(--border-default)
+        };
+
+        // 1. Enrollment Line Chart
+        const enrollCtx = document.getElementById('enrollmentsChart').getContext('2d');
+        const enrollLabels = {{ day_labels|safe }};
+        const enrollData = {{ enrollment_counts|safe }};
+        
+        // Gradient fill for line chart
+        const enrollGradient = enrollCtx.createLinearGradient(0, 0, 0, 300);
+        enrollGradient.addColorStop(0, 'rgba(127, 119, 221, 0.4)'); // purple-accent
+        enrollGradient.addColorStop(1, 'rgba(127, 119, 221, 0)');
+        
+        new Chart(enrollCtx, {
+            type: 'line',
+            data: {
+                labels: enrollLabels,
+                datasets: [{
+                    label: 'Enrollments',
+                    data: enrollData,
+                    borderColor: colors.purple.accent,
+                    borderWidth: 3,
+                    pointBackgroundColor: colors.purple.accent,
+                    pointBorderColor: '#0e0c1a',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    backgroundColor: enrollGradient,
+                    fill: true,
+                    tension: 0.35
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: '#1c1836',
+                        titleColor: '#eeedfe',
+                        bodyColor: '#eeedfe',
+                        borderColor: colors.purple.accent,
+                        borderWidth: 1,
+                        padding: 10,
+                        displayColors: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(38, 33, 92, 0.15)' // var(--border-default) with opacity
+                        },
+                        ticks: {
+                            color: '#cecbf6'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(38, 33, 92, 0.15)'
+                        },
+                        ticks: {
+                            color: '#cecbf6',
+                            precision: 0
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // 2. Category Distribution Doughnut Chart
+        const catCtx = document.getElementById('categoryChart').getContext('2d');
+        const catLabels = {{ category_labels|safe }};
+        const catData = {{ category_counts|safe }};
+        
+        new Chart(catCtx, {
+            type: 'doughnut',
+            data: {
+                labels: catLabels,
+                datasets: [{
+                    data: catData,
+                    backgroundColor: [
+                        colors.purple.accent,
+                        colors.teal.main,
+                        colors.amber.main,
+                        colors.pink.main,
+                        colors.purple.soft,
+                        colors.teal.light
+                    ],
+                    borderColor: '#1c1836',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 8,
+                            color: '#cecbf6'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#1c1836',
+                        titleColor: '#eeedfe',
+                        bodyColor: '#eeedfe',
+                        borderColor: 'rgba(127, 119, 221, 0.5)',
+                        borderWidth: 1,
+                        padding: 10
+                    }
+                },
+                cutout: '65%'
+            }
+        });
+
+        // 3. Course Popularity Rankings Bar Chart
+        const popCtx = document.getElementById('popularityChart').getContext('2d');
+        const popLabels = {{ course_popularity_labels|safe }};
+        const popData = {{ course_popularity_counts|safe }};
+        
+        // Truncate course labels if they are too long for the Y axis
+        const truncatedLabels = popLabels.map(label => label.length > 20 ? label.substring(0, 18) + '...' : label);
+        
+        new Chart(popCtx, {
+            type: 'bar',
+            data: {
+                labels: truncatedLabels,
+                datasets: [{
+                    data: popData,
+                    backgroundColor: colors.teal.main,
+                    borderRadius: 4,
+                    borderWidth: 0,
+                    barThickness: 12
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: '#1c1836',
+                        titleColor: '#eeedfe',
+                        bodyColor: '#eeedfe',
+                        borderColor: colors.teal.main,
+                        borderWidth: 1,
+                        padding: 10,
+                        callbacks: {
+                            title: function(context) {
+                                // Show full title in tooltip
+                                return popLabels[context[0].dataIndex];
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#cecbf6',
+                            precision: 0
+                        },
+                        beginAtZero: true
+                    },
+                    y: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#cecbf6'
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endif %}
+{% endblock %}

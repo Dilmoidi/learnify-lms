@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}My Courses - Learnify Instructor{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header Block -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="text-white mb-1">My Created Courses</h2>
+            <p class="text-secondary mb-0">Build, modify, and publish course outlines and syllabus lessons.</p>
+        </div>
+        <a href="{% url 'courses:course_create' %}" class="btn btn-premium">
+            <i class="bi bi-plus-lg me-1"></i>Create Course
+        </a>
+    </div>
+
+    <!-- Courses List -->
+    {% if courses %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+            {% for course in courses %}
+                <div class="col">
+                    <div class="card glass-card h-100 overflow-hidden">
+                        <!-- Thumbnail -->
+                        <div style="height: 160px; overflow: hidden; background-color: var(--bg-sidebar); position: relative;">
+                            {% if course.thumbnail %}
+                                <img src="{{ course.thumbnail.url }}" alt="{{ course.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            {% else %}
+                                <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-muted">
+                                    <i class="bi bi-journal-plus fs-2 mb-2 text-purple-accent"></i>
+                                    <span style="font-size: 0.8rem;">No Thumbnail</span>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Publish indicator -->
+                            <span class="badge badge-custom {% if course.is_published %}badge-teal{% else %}badge-amber{% endif %} position-absolute" style="position: absolute; top: 15px; left: 15px; z-index: 2;">
+                                {% if course.is_published %}Published{% else %}Draft{% endif %}
+                            </span>
+                        </div>
+
+                        <!-- Card Body -->
+                        <div class="card-body p-4 d-flex flex-column justify-content-between">
+                            <div>
+                                <h5 class="card-title text-white mb-1 text-truncate">{{ course.title }}</h5>
+                                <span class="badge badge-custom badge-purple mb-3" style="font-size: 0.7rem;">{{ course.category.name }}</span>
+                                <p class="text-secondary mb-3 text-truncate-2" style="font-size: 0.85rem; height: 2.4rem; overflow: hidden;">{{ course.description }}</p>
+                            </div>
+
+                            <div class="border-top border-default pt-3">
+                                <div class="d-flex justify-content-between text-secondary mb-3" style="font-size: 0.8rem;">
+                                    <span><i class="bi bi-mortarboard text-teal me-1"></i>{{ course.enrollments.count }} Students</span>
+                                    <span><i class="bi bi-play-circle text-purple-accent me-1"></i>{{ course.lessons.count }} Lessons</span>
+                                </div>
+                                
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <a href="{% url 'courses:course_detail' course.slug %}" class="btn btn-outline-premium btn-sm w-100">
+                                            Manage Syllabus
+                                        </a>
+                                    </div>
+                                    <div class="col-6">
+                                        <a href="{% url 'courses:course_edit' course.pk %}" class="btn btn-premium btn-sm w-100">
+                                            Edit Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card glass-card p-5 text-center">
+            <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 70px; height: 70px;">
+                <i class="bi bi-journal-plus text-purple-accent fs-2"></i>
+            </div>
+            <h5 class="text-white">Create Your First Course</h5>
+            <p class="text-secondary mb-4">Design rich curricula, load study materials, and engage with students.</p>
+            <a href="{% url 'courses:course_create' %}" class="btn btn-premium btn-sm">
+                <i class="bi bi-plus-lg me-1"></i>Get Started
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Edit Lesson{% else %}Add Lesson{% endif %} - Learnify{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <a href="{% url 'courses:course_detail' course.slug %}" class="btn btn-outline-premium btn-sm mb-4">
+        <i class="bi bi-arrow-left me-1"></i>Back to Course
+    </a>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card glass-card p-4">
+                <h4 class="text-white mb-4">
+                    <i class="bi bi-play-circle text-purple me-2"></i>
+                    {% if object %}Modify Lesson: {{ object.title }}{% else %}Add New Lesson to Syllabus{% endif %}
+                </h4>
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="id_title" class="form-label">Lesson Title</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.title.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_order" class="form-label">Sequence Order</label>
+                        {{ form.order }}
+                        <small class="text-muted d-block mt-1">Specify lesson sorting order (e.g. 1, 2, 3...)</small>
+                        {% if form.order.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.order.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_description" class="form-label">Lesson Description</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_video_url" class="form-label">Video Embed URL (Optional)</label>
+                        {{ form.video_url }}
+                        <small class="text-muted d-block mt-1">Direct embed links from YouTube or Vimeo (e.g. https://www.youtube.com/embed/...) </small>
+                        {% if form.video_url.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.video_url.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_video_file" class="form-label">Video File Upload (Alternative)</label>
+                        {{ form.video_file }}
+                        {% if form.video_file.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.video_file.errors }}</div>
+                        {% endif %}
+                        {% if object.video_file %}
+                            <small class="text-muted d-block mt-1">Current: <a href="{{ object.video_file.url }}" target="_blank">{{ object.video_file.name }}</a></small>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_pdf_notes" class="form-label">PDF Notes / Resources Upload (Optional)</label>
+                        {{ form.pdf_notes }}
+                        {% if form.pdf_notes.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.pdf_notes.errors }}</div>
+                        {% endif %}
+                        {% if object.pdf_notes %}
+                            <small class="text-muted d-block mt-1">Current: <a href="{{ object.pdf_notes.url }}" target="_blank">{{ object.pdf_notes.name }}</a></small>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="btn btn-premium w-100">
+                        {% if object %}Save Lesson Changes{% else %}Add Lesson to Syllabus{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

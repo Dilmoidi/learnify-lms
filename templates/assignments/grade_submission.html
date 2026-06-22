@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Grade Submission - Learnify{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <a href="{% url 'assignments:assignment_submissions' assignment.id %}" class="btn btn-outline-premium btn-sm mb-4">
+        <i class="bi bi-arrow-left me-1"></i>Back to Submissions
+    </a>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card glass-card p-4 mb-4">
+                <h4 class="text-white mb-3"><i class="bi bi-file-earmark-check text-purple me-2"></i>Evaluate Student Work</h4>
+                
+                <div class="p-3 bg-sidebar border-default rounded mb-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <span class="text-muted d-block" style="font-size: 0.8rem;">Student Name</span>
+                            <span class="fw-bold text-white">{{ submission.student.user.get_full_name|default:submission.student.user.username }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <span class="text-muted d-block" style="font-size: 0.8rem;">Submitted File</span>
+                            <a href="{{ submission.submitted_file.url }}" download class="fw-bold text-teal link-hover" style="font-size: 0.95rem;">
+                                <i class="bi bi-file-earmark-arrow-down me-1"></i>{{ submission.submitted_file.name }}
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <span class="text-muted d-block" style="font-size: 0.8rem;">Assignment Description</span>
+                            <span class="text-secondary" style="font-size: 0.85rem;">{{ assignment.title }} (Max Marks: {{ assignment.max_marks }} pts)</span>
+                        </div>
+                        <div class="col-md-6">
+                            <span class="text-muted d-block" style="font-size: 0.8rem;">Submitted On</span>
+                            <span class="text-secondary" style="font-size: 0.85rem;">{{ submission.submitted_at|date:"M d, Y - H:i" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="id_grade" class="form-label">Grade Awarded (out of {{ assignment.max_marks }})</label>
+                        {{ form.grade }}
+                        {% if form.grade.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.grade.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_feedback" class="form-label">Feedback Comments</label>
+                        {{ form.feedback }}
+                        {% if form.feedback.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.feedback.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="btn btn-premium w-100">
+                        <i class="bi bi-check-circle-fill me-1"></i>Submit Marks & Feedback
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Questions: {{ quiz.title }} - Learnify{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+        <div>
+            <a href="{% url 'courses:course_detail' quiz.course.slug %}" class="btn btn-outline-premium btn-sm mb-3 d-inline-block">
+                <i class="bi bi-arrow-left me-1"></i>Back to Course Info
+            </a>
+            <h2 class="text-white mb-1">Manage Quiz Questions</h2>
+            <p class="text-secondary mb-0">Quiz: <strong>{{ quiz.title }}</strong> (Passing Mark: {{ quiz.pass_percentage }}%)</p>
+        </div>
+        
+        <a href="{% url 'quizzes:question_add' quiz.id %}" class="btn btn-premium align-self-md-end">
+            <i class="bi bi-plus-lg me-1"></i>Add MCQ Question
+        </a>
+    </div>
+
+    <!-- Questions list table -->
+    <div class="card glass-card p-4">
+        {% if questions %}
+            <div class="table-responsive">
+                <table class="table table-premium align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;">#</th>
+                            <th>Question Content</th>
+                            <th>Options Preview</th>
+                            <th>Correct Option</th>
+                            <th class="text-end" style="width: 150px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for question in questions %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>
+                                    <div class="fw-bold text-white" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        {{ question.question_text }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="font-size: 0.75rem;" class="text-secondary">
+                                        1: {{ question.option_1|truncatechars:20 }} | 2: {{ question.option_2|truncatechars:20 }}<br>
+                                        3: {{ question.option_3|truncatechars:20 }} | 4: {{ question.option_4|truncatechars:20 }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-custom badge-teal text-uppercase">
+                                        Option {{ question.correct_option }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <a href="{% url 'quizzes:question_edit' question.pk %}" class="btn btn-outline-premium btn-sm p-2">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="{% url 'quizzes:question_delete' question.pk %}" class="btn btn-outline-danger btn-sm p-2" style="border-color: var(--pink-border); color: var(--pink-main);">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 70px; height: 70px;">
+                    <i class="bi bi-patch-question text-amber fs-2"></i>
+                </div>
+                <h5 class="text-white">No Questions Yet</h5>
+                <p class="text-secondary mb-4">This quiz requires multiple-choice questions before students can attempt it.</p>
+                <a href="{% url 'quizzes:question_add' quiz.id %}" class="btn btn-premium btn-sm">
+                    <i class="bi bi-plus-lg me-1"></i>Add First Question
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

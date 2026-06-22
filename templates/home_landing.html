@@ -1,0 +1,1610 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learnify - Learn Smarter, Achieve Greater</title>
+    
+    <!-- Tabler Icons & Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    :root {
+        --bg-page: #06040f;
+        --bg-card: rgba(15, 12, 38, 0.5);
+        --bg-card-hover: rgba(23, 19, 58, 0.7);
+        --border-color: rgba(99, 102, 241, 0.15);
+        --border-hover: rgba(99, 102, 241, 0.4);
+        
+        --color-primary: #6366f1;
+        --color-primary-glow: rgba(99, 102, 241, 0.15);
+        --color-secondary: #0ea5e9;
+        --color-secondary-glow: rgba(14, 165, 233, 0.15);
+        --color-success: #10b981;
+        --color-amber: #f59e0b;
+        --color-pink: #ec4899;
+        --color-text-main: #f3f4f6;
+        --color-text-muted: #9ca3af;
+    }
+    
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+    
+    body {
+        background-color: var(--bg-page);
+        color: var(--color-text-main);
+        font-family: 'Inter', sans-serif;
+        overflow-x: hidden;
+        position: relative;
+    }
+    
+    /* Dynamic Background Glow Orbs */
+    .glow-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(120px);
+        opacity: 0.28;
+        pointer-events: none;
+        z-index: 1;
+    }
+    .orb-1 {
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, var(--color-primary) 0%, transparent 70%);
+        top: -150px;
+        right: -100px;
+        animation: pulseOrb 8s ease-in-out infinite alternate;
+    }
+    .orb-2 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, var(--color-secondary) 0%, transparent 70%);
+        bottom: 20%;
+        left: -100px;
+        animation: pulseOrb 12s ease-in-out infinite alternate-reverse;
+    }
+    .orb-3 {
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, var(--color-pink) 0%, transparent 70%);
+        top: 40%;
+        right: 20%;
+        animation: floatOrb 10s ease-in-out infinite;
+    }
+    
+    @keyframes pulseOrb {
+        0% { transform: scale(1) translate(0, 0); opacity: 0.2; }
+        100% { transform: scale(1.15) translate(20px, 30px); opacity: 0.35; }
+    }
+    @keyframes floatOrb {
+        0%, 100% { transform: translate(0, 0); }
+        50% { transform: translate(-30px, 40px); }
+    }
+    
+    .lf-page {
+        position: relative;
+        z-index: 2;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Navigation Bar */
+    .lf-nav {
+        background: rgba(6, 4, 15, 0.7);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--border-color);
+        padding: 0 40px;
+        height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        transition: border-color 0.3s;
+    }
+    .lf-nav:hover {
+        border-color: rgba(99, 102, 241, 0.25);
+    }
+    .lf-nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+    }
+    .lf-nav-logo-icon {
+        width: 38px;
+        height: 38px;
+        background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 20px;
+        box-shadow: 0 0 20px var(--color-primary-glow);
+    }
+    .lf-nav-logo-text {
+        font-family: 'Outfit', sans-serif;
+        font-size: 22px;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -0.5px;
+    }
+    .lf-nav-logo-text span {
+        color: var(--color-amber);
+    }
+    .lf-nav-links {
+        display: flex;
+        gap: 32px;
+        align-items: center;
+    }
+    .lf-nav-link {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--color-text-muted);
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        position: relative;
+        padding: 6px 0;
+    }
+    .lf-nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+        transition: width 0.3s;
+    }
+    .lf-nav-link:hover {
+        color: #fff;
+    }
+    .lf-nav-link:hover::after {
+        width: 100%;
+    }
+    .lf-nav-btns {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+    .lf-nav-login {
+        padding: 9px 22px;
+        border: 1.5px solid var(--color-primary);
+        border-radius: 10px;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: #fff;
+        cursor: pointer;
+        background: transparent;
+        transition: all 0.3s;
+        text-decoration: none;
+        font-family: 'Inter', sans-serif;
+    }
+    .lf-nav-login:hover {
+        background: var(--color-primary-glow);
+        box-shadow: 0 0 15px var(--color-primary-glow);
+        transform: translateY(-1px);
+    }
+    .lf-nav-cta {
+        padding: 10px 22px;
+        border: none;
+        border-radius: 10px;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: #fff;
+        cursor: pointer;
+        background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+        transition: all 0.3s;
+        text-decoration: none;
+        font-family: 'Inter', sans-serif;
+        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+    }
+    .lf-nav-cta:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 24px rgba(99, 102, 241, 0.45);
+    }
+    
+    /* Hero Section */
+    .lf-hero {
+        padding: 80px 40px;
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 60px;
+        align-items: center;
+        max-width: 1300px;
+        margin: 0 auto;
+        width: 100%;
+        position: relative;
+    }
+    
+    .lf-hero-content {
+        position: relative;
+        z-index: 2;
+    }
+    .lf-hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(99, 102, 241, 0.08);
+        border: 1px solid rgba(99, 102, 241, 0.25);
+        border-radius: 30px;
+        padding: 6px 16px;
+        margin-bottom: 24px;
+        animation: floatAnimation 4s ease-in-out infinite;
+    }
+    .lf-hero-badge-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--color-secondary);
+        border-radius: 50%;
+        box-shadow: 0 0 10px var(--color-secondary);
+        animation: pulse 1.8s ease-in-out infinite;
+    }
+    .lf-hero-badge-text {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #a5b4fc;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    
+    .lf-hero-h1 {
+        font-family: 'Outfit', sans-serif;
+        font-size: 54px;
+        font-weight: 900;
+        color: #fff;
+        line-height: 1.15;
+        margin-bottom: 20px;
+        letter-spacing: -1.5px;
+    }
+    .lf-hero-h1 span {
+        background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .lf-hero-p {
+        font-size: 16px;
+        color: var(--color-text-muted);
+        line-height: 1.7;
+        margin-bottom: 36px;
+        max-width: 520px;
+    }
+    
+    .lf-hero-actions {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 48px;
+    }
+    .lf-hero-btn-primary {
+        padding: 15px 32px;
+        border: none;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #fff;
+        cursor: pointer;
+        background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+        font-family: 'Inter', sans-serif;
+        transition: all 0.3s;
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
+        text-decoration: none;
+        display: inline-block;
+    }
+    .lf-hero-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(99, 102, 241, 0.5);
+    }
+    .lf-hero-btn-secondary {
+        padding: 15px 28px;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        color: #fff;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.03);
+        font-family: 'Inter', sans-serif;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        backdrop-filter: blur(10px);
+        text-decoration: none;
+    }
+    .lf-hero-btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: var(--border-hover);
+        transform: translateY(-2px);
+    }
+    
+    .lf-hero-stats {
+        display: flex;
+        gap: 40px;
+        border-top: 1px solid var(--border-color);
+        padding-top: 32px;
+        max-width: 500px;
+    }
+    .lf-stat-num {
+        font-family: 'Outfit', sans-serif;
+        font-size: 32px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #9ca3af);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .lf-stat-label {
+        font-size: 12px;
+        color: var(--color-text-muted);
+        margin-top: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Hero Visual Right Column: Dashboard Mockup */
+    .lf-hero-visual {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .dashboard-mockup {
+        width: 100%;
+        max-width: 480px;
+        background: rgba(10, 8, 30, 0.6);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        position: relative;
+        transition: border-color 0.3s, transform 0.3s;
+    }
+    .dashboard-mockup:hover {
+        border-color: var(--border-hover);
+        transform: translateY(-3px);
+    }
+    .mockup-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding-bottom: 12px;
+        margin-bottom: 16px;
+    }
+    .mockup-dots {
+        display: flex;
+        gap: 6px;
+    }
+    .mockup-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+    .mockup-dot.red { background: #ef4444; }
+    .mockup-dot.yellow { background: #f59e0b; }
+    .mockup-dot.green { background: #10b981; }
+    
+    .mockup-title {
+        font-size: 12px;
+        color: var(--color-text-muted);
+        font-weight: 500;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 3px 12px;
+        border-radius: 12px;
+    }
+    
+    .mockup-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .mockup-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 12px 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .mockup-card-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .mockup-card-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+    .mockup-card-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #fff;
+    }
+    .mockup-card-sub {
+        font-size: 11px;
+        color: var(--color-text-muted);
+        margin-top: 2px;
+    }
+    
+    /* Mockup Mini Chart */
+    .mockup-chart-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 14px;
+    }
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+    .chart-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: #fff;
+    }
+    .chart-bars {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        height: 60px;
+        padding-top: 10px;
+    }
+    .chart-bar-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+    }
+    .chart-bar {
+        width: 14px;
+        border-radius: 4px 4px 0 0;
+        background: linear-gradient(to top, var(--color-primary), var(--color-secondary));
+        transition: height 0.5s;
+    }
+    .chart-label {
+        font-size: 9px;
+        color: var(--color-text-muted);
+        margin-top: 4px;
+    }
+    
+    /* Overlay Floating Cards */
+    .floating-badge {
+        position: absolute;
+        background: rgba(18, 14, 46, 0.85);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+        z-index: 10;
+        transition: all 0.3s;
+    }
+    .floating-badge:hover {
+        transform: translateY(-2px) scale(1.03);
+        border-color: var(--border-hover);
+    }
+    .fb-streak {
+        top: -15px;
+        left: -20px;
+        animation: floatCard1 6s ease-in-out infinite;
+        border-color: rgba(245, 158, 11, 0.3);
+    }
+    .fb-score {
+        bottom: 30px;
+        right: -25px;
+        animation: floatCard2 7s ease-in-out infinite;
+        border-color: rgba(16, 185, 129, 0.3);
+    }
+    
+    @keyframes floatCard1 {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+    @keyframes floatCard2 {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(6px); }
+    }
+    
+    /* Subjects / Categories Section */
+    .lf-subjects {
+        padding: 90px 40px;
+        max-width: 1300px;
+        margin: 0 auto;
+        width: 100%;
+    }
+    .section-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+    .lf-section-tag {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--color-primary);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+        display: inline-block;
+    }
+    .lf-section-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 38px;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 12px;
+    }
+    .lf-section-sub {
+        font-size: 15px;
+        color: var(--color-text-muted);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .lf-subjects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 24px;
+    }
+    .lf-subject-card {
+        background: var(--bg-card);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--border-color);
+        border-radius: 18px;
+        padding: 24px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: block;
+        position: relative;
+        overflow: hidden;
+    }
+    .lf-subject-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, transparent 100%);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .lf-subject-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--border-hover);
+        box-shadow: 0 12px 30px rgba(99, 102, 241, 0.15);
+        background: var(--bg-card-hover);
+    }
+    .lf-subject-card:hover::before {
+        opacity: 1;
+    }
+    .lf-sub-emoji {
+        font-size: 36px;
+        margin-bottom: 16px;
+        display: inline-block;
+        transition: transform 0.3s;
+    }
+    .lf-subject-card:hover .lf-sub-emoji {
+        transform: scale(1.1) rotate(5deg);
+    }
+    .lf-sub-name {
+        font-family: 'Outfit', sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 6px;
+    }
+    .lf-sub-count {
+        font-size: 13px;
+        color: var(--color-text-muted);
+    }
+    .lf-sub-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: linear-gradient(135deg, var(--color-amber), #f97316);
+        color: #000;
+        font-size: 9.5px;
+        font-weight: 800;
+        padding: 3px 8px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Features Showcase Grid Section */
+    .lf-features-section {
+        padding: 40px 40px 90px;
+        max-width: 1300px;
+        margin: 0 auto;
+        width: 100%;
+    }
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 30px;
+        margin-top: 20px;
+    }
+    .feature-card {
+        background: var(--bg-card);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 32px;
+        transition: all 0.3s;
+    }
+    .feature-card:hover {
+        border-color: var(--border-hover);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+    .feature-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: var(--color-primary-glow);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        color: var(--color-primary);
+        margin-bottom: 20px;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+    .feature-card:nth-child(2) .feature-icon-wrapper {
+        background: var(--color-secondary-glow);
+        color: var(--color-secondary);
+        border-color: rgba(14, 165, 233, 0.2);
+    }
+    .feature-card:nth-child(3) .feature-icon-wrapper {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--color-success);
+        border-color: rgba(16, 185, 129, 0.2);
+    }
+    .feature-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 19px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 10px;
+    }
+    .feature-desc {
+        font-size: 14px;
+        color: var(--color-text-muted);
+        line-height: 1.6;
+    }
+    
+    /* Login & Dynamic Interactive Auth Section */
+    .lf-login-section {
+        padding: 90px 40px;
+        background: linear-gradient(180deg, transparent, rgba(15, 12, 38, 0.3));
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        gap: 80px;
+        align-items: center;
+        max-width: 1300px;
+        margin: 0 auto;
+        width: 100%;
+    }
+    .lf-login-left {
+        flex: 1.1;
+    }
+    .lf-login-left-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 34px;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 16px;
+    }
+    .lf-login-left-sub {
+        font-size: 15px;
+        color: var(--color-text-muted);
+        line-height: 1.6;
+        margin-bottom: 36px;
+    }
+    
+    .lf-bullet-features {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    .lf-bullet-item {
+        display: flex;
+        gap: 16px;
+    }
+    .lf-bullet-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+    .lf-bullet-text {
+        font-size: 14.5px;
+        color: var(--color-text-muted);
+        line-height: 1.5;
+    }
+    .lf-bullet-text strong {
+        color: #fff;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 3px;
+    }
+    
+    /* Login & Account form styles */
+    .lf-login-form-wrap {
+        flex: 0.9;
+        width: 100%;
+        max-width: 400px;
+        display: flex;
+        justify-content: center;
+    }
+    .lf-form-card {
+        background: rgba(10, 8, 30, 0.75);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        padding: 36px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        width: 100%;
+        transition: border-color 0.3s;
+    }
+    .lf-form-card:hover {
+        border-color: var(--border-hover);
+    }
+    
+    .lf-form-header {
+        text-align: center;
+        margin-bottom: 28px;
+    }
+    .lf-form-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+    .lf-form-logo-icon {
+        width: 30px;
+        height: 30px;
+        background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 15px;
+    }
+    .lf-form-logo-text {
+        font-family: 'Outfit', sans-serif;
+        font-size: 18px;
+        font-weight: 800;
+        color: #fff;
+    }
+    .lf-form-logo-text span {
+        color: var(--color-amber);
+    }
+    
+    .lf-form-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 20px;
+        font-weight: 700;
+        color: #fff;
+        margin-top: 8px;
+    }
+    .lf-form-sub {
+        font-size: 13px;
+        color: var(--color-text-muted);
+        margin-top: 4px;
+    }
+    
+    /* Django Alert Messages */
+    .lf-alert-banner {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        border-radius: 10px;
+        padding: 10px 14px;
+        margin-bottom: 20px;
+        font-size: 12.5px;
+        color: var(--color-success);
+    }
+    .lf-alert-banner.error-banner {
+        background: rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.3);
+        color: #f87171;
+    }
+    .lf-alert-close-btn {
+        margin-left: auto;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: inherit;
+        font-size: 18px;
+        line-height: 1;
+        padding: 0;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+    .lf-alert-close-btn:hover {
+        opacity: 1;
+    }
+    
+    /* Form Inputs */
+    .lf-field-group {
+        margin-bottom: 20px;
+    }
+    .lf-field-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--color-text-muted);
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 8px;
+    }
+    .lf-input-container {
+        position: relative;
+    }
+    .lf-field-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--color-text-muted);
+        font-size: 16px;
+        pointer-events: none;
+        transition: color 0.3s;
+    }
+    .lf-field-input {
+        width: 100%;
+        height: 48px;
+        border: 1.5px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0 16px 0 42px;
+        font-size: 14px;
+        color: #fff;
+        background: rgba(255, 255, 255, 0.02);
+        outline: none;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.3s;
+    }
+    .lf-field-input:focus {
+        border-color: var(--color-primary);
+        background: rgba(255, 255, 255, 0.05);
+        box-shadow: 0 0 15px rgba(99, 102, 241, 0.25);
+    }
+    .lf-field-input:focus ~ .lf-field-icon {
+        color: var(--color-primary);
+    }
+    .lf-eye-btn {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--color-text-muted);
+        font-size: 16px;
+        padding: 0;
+        transition: color 0.2s;
+    }
+    .lf-eye-btn:hover {
+        color: var(--color-primary);
+    }
+    
+    .lf-form-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+    }
+    .lf-check-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+    }
+    .lf-check-input {
+        width: 15px;
+        height: 15px;
+        accent-color: var(--color-primary);
+        cursor: pointer;
+    }
+    .lf-check-txt {
+        font-size: 12.5px;
+        color: var(--color-text-muted);
+    }
+    .lf-forgot-link {
+        font-size: 12.5px;
+        color: var(--color-primary);
+        font-weight: 600;
+        cursor: pointer;
+        background: none;
+        border: none;
+        font-family: 'Inter', sans-serif;
+    }
+    .lf-forgot-link:hover {
+        color: #a5b4fc;
+    }
+    
+    .lf-submit-btn {
+        width: 100%;
+        height: 48px;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+        color: #fff;
+        font-size: 14.5px;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+    .lf-submit-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+    }
+    
+    .lf-divider-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    .lf-div-line {
+        flex: 1;
+        height: 1px;
+        background: var(--border-color);
+    }
+    .lf-div-text {
+        font-size: 11px;
+        color: var(--color-text-muted);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .lf-social-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 24px;
+    }
+    .lf-social-card {
+        flex: 1;
+        height: 42px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--color-text-main);
+        font-family: 'Inter', sans-serif;
+        transition: all 0.3s;
+    }
+    .lf-social-card:hover {
+        background: var(--color-primary-glow);
+        border-color: var(--border-hover);
+    }
+    
+    .lf-signup-row {
+        text-align: center;
+        font-size: 13px;
+        color: var(--color-text-muted);
+    }
+    .lf-signup-link {
+        color: var(--color-primary);
+        font-weight: 700;
+        text-decoration: none;
+    }
+    .lf-signup-link:hover {
+        color: #a5b4fc;
+    }
+    
+    /* Footer */
+    .lf-footer {
+        background: rgba(4, 3, 11, 0.8);
+        border-top: 1px solid var(--border-color);
+        padding: 60px 40px 30px;
+        margin-top: auto;
+    }
+    .lf-footer-top {
+        display: flex;
+        gap: 60px;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+        max-width: 1300px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .lf-footer-brand {
+        flex: 1.5;
+        min-width: 240px;
+    }
+    .lf-footer-logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    .lf-footer-logo-icon {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 16px;
+    }
+    .lf-footer-logo-text {
+        font-family: 'Outfit', sans-serif;
+        font-size: 20px;
+        font-weight: 800;
+        color: #fff;
+    }
+    .lf-footer-logo-text span {
+        color: var(--color-amber);
+    }
+    .lf-footer-desc {
+        font-size: 13px;
+        color: var(--color-text-muted);
+        line-height: 1.7;
+        max-width: 280px;
+    }
+    .lf-footer-col {
+        flex: 1;
+        min-width: 140px;
+    }
+    .lf-footer-col-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 18px;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+    }
+    .lf-footer-col-link {
+        display: block;
+        font-size: 13px;
+        color: var(--color-text-muted);
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: color 0.2s;
+        text-decoration: none;
+    }
+    .lf-footer-col-link:hover {
+        color: var(--color-primary);
+    }
+    
+    .lf-footer-bottom {
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        padding-top: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 20px;
+        max-width: 1300px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .lf-footer-copy {
+        font-size: 12px;
+        color: var(--color-text-muted);
+    }
+    .lf-footer-socials {
+        display: flex;
+        gap: 12px;
+    }
+    .lf-footer-social-btn {
+        width: 36px;
+        height: 36px;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--color-text-muted);
+        font-size: 16px;
+        transition: all 0.3s;
+        border: 1px solid var(--border-color);
+    }
+    .lf-footer-social-btn:hover {
+        background: var(--color-primary);
+        color: #fff;
+        border-color: transparent;
+        transform: translateY(-2px);
+    }
+    
+    /* Animations */
+    @keyframes floatAnimation {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.15); }
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 991px) {
+        .lf-hero {
+            grid-template-columns: 1fr;
+            text-align: center;
+            padding: 60px 20px;
+            gap: 50px;
+        }
+        .lf-hero-badge {
+            justify-content: center;
+        }
+        .lf-hero-h1 {
+            font-size: 40px;
+        }
+        .lf-hero-p {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .lf-hero-actions {
+            justify-content: center;
+        }
+        .lf-hero-stats {
+            justify-content: center;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .lf-hero-visual {
+            margin-top: 20px;
+        }
+        .lf-login-section {
+            flex-direction: column;
+            padding: 60px 20px;
+            gap: 50px;
+        }
+        .lf-login-form-wrap {
+            max-width: 100%;
+        }
+    }
+    </style>
+</head>
+<body>
+
+<!-- Blur Orbs -->
+<div class="glow-orb orb-1"></div>
+<div class="glow-orb orb-2"></div>
+<div class="glow-orb orb-3"></div>
+
+<div class="lf-page">
+
+<!-- Header navigation -->
+<nav class="lf-nav">
+  <a href="{% url 'home' %}" class="lf-nav-logo">
+    <div class="lf-nav-logo-icon"><i class="ti ti-rocket" aria-hidden="true"></i></div>
+    <span class="lf-nav-logo-text">Learn<span>ify</span></span>
+  </a>
+
+  <div class="lf-nav-btns">
+    {% if user.is_authenticated %}
+      <a href="{% url 'dashboard' %}" class="lf-nav-cta" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));">Dashboard</a>
+      <form action="{% url 'accounts:logout' %}" method="post" class="d-inline" id="lf-logout-nav">
+        {% csrf_token %}
+        <a href="#" onclick="document.getElementById('lf-logout-nav').submit(); return false;" class="lf-nav-login" style="border-color: #ef4444; color: #f87171;">Sign Out</a>
+      </form>
+    {% else %}
+      <a href="{% url 'accounts:login' %}" class="lf-nav-login">Sign In</a>
+      <a href="{% url 'accounts:register' %}" class="lf-nav-cta">Start Free</a>
+    {% endif %}
+  </div>
+</nav>
+
+<!-- Hero section -->
+<div class="lf-hero">
+  <div class="lf-hero-content">
+    <div class="lf-hero-badge">
+      <div class="lf-hero-badge-dot"></div>
+      <span class="lf-hero-badge-text">India's #1 Learning app</span>
+    </div>
+    <h1 class="lf-hero-h1">Learn Smarter,<br>Achieve <span>Greater</span></h1>
+    <p class="lf-hero-p">Join millions of students who are transforming their future with personalised, engaging lessons from India's best teachers.</p>
+    <div class="lf-hero-actions">
+      <a href="{% url 'courses:course_list' %}" class="lf-hero-btn-primary">Start Learning Free</a>
+      <a href="{% url 'courses:course_list' %}" class="lf-hero-btn-secondary"><i class="ti ti-player-play" style="font-size:13px;" aria-hidden="true"></i> Watch demo</a>
+    </div>
+    <div class="lf-hero-stats">
+      <div class="lf-stat">
+        <div class="lf-stat-num">{{ total_students|default:"15M" }}+</div>
+        <div class="lf-stat-label">Students</div>
+      </div>
+      <div class="lf-stat">
+        <div class="lf-stat-num">{{ total_instructors|default:"1,200" }}+</div>
+        <div class="lf-stat-label">Teachers</div>
+      </div>
+      <div class="lf-stat">
+        <div class="lf-stat-num">{{ total_courses|default:"98%" }}</div>
+        <div class="lf-stat-label">Courses</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lf-hero-visual">
+    <!-- Overlay Floating Badges -->
+    <div class="floating-badge fb-streak">
+      <span style="font-size: 20px;">🔥</span>
+      <div>
+        <div style="font-size: 11px; font-weight: 700; color: #fff;">14 Days</div>
+        <div style="font-size: 9px; color: var(--color-amber);">Daily Streak</div>
+      </div>
+    </div>
+    
+    <div class="floating-badge fb-score">
+      <span style="font-size: 20px;">⭐</span>
+      <div>
+        <div style="font-size: 11px; font-weight: 700; color: #fff;">980 pts</div>
+        <div style="font-size: 9px; color: var(--color-success);">Score Earned</div>
+      </div>
+    </div>
+
+    <!-- Interactive CSS Dashboard Console Mockup -->
+    <div class="dashboard-mockup">
+      <div class="mockup-header">
+        <div class="mockup-dots">
+          <div class="mockup-dot red"></div>
+          <div class="mockup-dot yellow"></div>
+          <div class="mockup-dot green"></div>
+        </div>
+        <div class="mockup-title">student_console_v2.0</div>
+        <div style="width: 32px;"></div>
+      </div>
+      
+      <div class="mockup-grid">
+        <!-- Mockup Card 1: Course -->
+        <div class="mockup-card">
+          <div class="mockup-card-left">
+            <div class="mockup-card-icon" style="background: rgba(99, 102, 241, 0.1); color: var(--color-primary);"><i class="ti ti-brand-python"></i></div>
+            <div>
+              <div class="mockup-card-title">Python Basics</div>
+              <div class="mockup-card-sub">Completed: 8 / 10 lessons</div>
+            </div>
+          </div>
+          <div style="font-size: 11px; font-weight: 700; color: var(--color-primary);">80%</div>
+        </div>
+        
+        <!-- Mockup Card 2: Interactive Chart -->
+        <div class="mockup-chart-card">
+          <div class="chart-header">
+            <span class="chart-title"><i class="ti ti-activity-heartbeat" style="color: var(--color-secondary);"></i> Learning Activity</span>
+            <span style="font-size: 10px; color: var(--color-text-muted);">Weekly Hours</span>
+          </div>
+          <div class="chart-bars">
+            <div class="chart-bar-container"><div class="chart-bar" style="height: 25px;"></div><span class="chart-label">M</span></div>
+            <div class="chart-bar-container"><div class="chart-bar" style="height: 40px;"></div><span class="chart-label">T</span></div>
+            <div class="chart-bar-container"><div class="chart-bar" style="height: 18px;"></div><span class="chart-label">W</span></div>
+            <div class="chart-bar-container"><div class="chart-bar" style="height: 52px;"></div><span class="chart-label">T</span></div>
+            <div class="chart-bar-container"><div class="chart-bar" style="height: 30px;"></div><span class="chart-label">F</span></div>
+            <div class="chart-bar-container"><div class="chart-bar" style="height: 10px;"></div><span class="chart-label">S</span></div>
+            <div class="chart-bar-container"><div class="chart-bar" style="height: 15px;"></div><span class="chart-label">S</span></div>
+          </div>
+        </div>
+
+        <!-- Mockup Card 3: Quiz -->
+        <div class="mockup-card">
+          <div class="mockup-card-left">
+            <div class="mockup-card-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--color-success);"><i class="ti ti-trophy"></i></div>
+            <div>
+              <div class="mockup-card-title">FastAPI Midterm Quiz</div>
+              <div class="mockup-card-sub">Passed with excellence</div>
+            </div>
+          </div>
+          <span style="font-size: 11px; font-weight: 700; color: var(--color-success); background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 8px;">A+</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Dynamic Subjects list -->
+<div class="lf-subjects">
+  <div class="section-header">
+    <div class="lf-section-tag">Explore topics</div>
+    <div class="lf-section-title">What do you want to learn?</div>
+    <div class="lf-section-sub">Thousands of lessons across every subject, for every grade.</div>
+  </div>
+  
+  <div class="lf-subjects-grid">
+    {% for item in category_data %}
+      <a href="{% url 'courses:course_list' %}?category={{ item.category.slug }}" class="lf-subject-card">
+        <span class="lf-sub-emoji">
+          {% if item.category.name == 'Web Development' %}💻
+          {% elif item.category.name == 'Python Django' %}🐍
+          {% elif item.category.name == 'Data Science & AI' %}📊
+          {% elif item.category.name == 'Mobile Apps' %}📱
+          {% elif item.category.name == 'Cyber Security' %}🔒
+          {% else %}📖{% endif %}
+        </span>
+        <div class="lf-sub-name">{{ item.category.name }}</div>
+        <div class="lf-sub-count">{{ item.lesson_count }} lessons</div>
+        {% if forloop.first %}
+          <div class="lf-sub-badge">Popular</div>
+        {% elif forloop.last %}
+          <div class="lf-sub-badge">New</div>
+        {% endif %}
+      </a>
+    {% empty %}
+      <div class="lf-subject-card"><span class="lf-sub-emoji">📐</span><div class="lf-sub-name">Maths</div><div class="lf-sub-count">2,400 lessons</div><div class="lf-sub-badge">Popular</div></div>
+      <div class="lf-subject-card"><span class="lf-sub-emoji">🔬</span><div class="lf-sub-name">Science</div><div class="lf-sub-count">1,800 lessons</div></div>
+      <div class="lf-subject-card"><span class="lf-sub-emoji">🌍</span><div class="lf-sub-name">Social Studies</div><div class="lf-sub-count">940 lessons</div></div>
+      <div class="lf-subject-card"><span class="lf-sub-emoji">📖</span><div class="lf-sub-name">English</div><div class="lf-sub-count">1,100 lessons</div></div>
+      <div class="lf-subject-card"><span class="lf-sub-emoji">💻</span><div class="lf-sub-name">Coding</div><div class="lf-sub-count">680 lessons</div><div class="lf-sub-badge">New</div></div>
+      <div class="lf-subject-card"><span class="lf-sub-emoji">🎨</span><div class="lf-sub-name">Arts</div><div class="lf-sub-count">420 lessons</div></div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Features Section -->
+<div class="lf-features-section">
+  <div class="section-header">
+    <div class="lf-section-tag">Key Features</div>
+    <div class="lf-section-title">Designed for Visual Learners</div>
+    <div class="lf-section-sub">We combine state-of-the-art interactive modules with seed-realistic courses.</div>
+  </div>
+  
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon-wrapper"><i class="ti ti-rocket"></i></div>
+      <div class="feature-title">Fast, Adaptive Lessons</div>
+      <div class="feature-desc">Learn key tech stacks, algorithms, and practices with custom, byte-sized 1-minute educational videos tailored to keep your engagement at its peak.</div>
+    </div>
+    
+    <div class="feature-card">
+      <div class="feature-icon-wrapper"><i class="ti ti-activity-heartbeat"></i></div>
+      <div class="feature-title">Real-Time Progression</div>
+      <div class="feature-desc">Keep track of your score points, daily consistency streaks, and lesson syllabus checklists updated in real-time as you navigate through your modules.</div>
+    </div>
+    
+    <div class="feature-card">
+      <div class="feature-icon-wrapper"><i class="ti ti-award"></i></div>
+      <div class="feature-title">LMS Certification</div>
+      <div class="feature-desc">Receive beautifully rendered custom certificates upon reaching 100% completion in any module, completely ready for public validation checks.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Account options & login form -->
+<div class="lf-login-section">
+  <div class="lf-login-left">
+    <div class="lf-section-tag">Start Your Journey</div>
+    <div class="lf-login-left-title">Pick up where you left off</div>
+    <div class="lf-login-left-sub">Sign in to access your personalised dashboard, continue your streak, and unlock all your saved courses.</div>
+    
+    <div class="lf-bullet-features">
+      <div class="lf-bullet-item">
+        <div class="lf-bullet-icon" style="background: rgba(99,102,241,0.1); color: var(--color-primary);"><i class="ti ti-device-laptop"></i></div>
+        <div class="lf-bullet-text"><strong>Learn on any device</strong>Switch seamlessly between phone, tablet, and desktop viewports.</div>
+      </div>
+      
+      <div class="lf-bullet-item">
+        <div class="lf-bullet-icon" style="background: rgba(14,165,233,0.1); color: var(--color-secondary);"><i class="ti ti-bolt"></i></div>
+        <div class="lf-bullet-text"><strong>Micro-learning Modules</strong>Fast educational content that simplifies complex engineering designs.</div>
+      </div>
+      
+      <div class="lf-bullet-item">
+        <div class="lf-bullet-icon" style="background: rgba(16,185,129,0.1); color: var(--color-success);"><i class="ti ti-chart-line"></i></div>
+        <div class="lf-bullet-text"><strong>Automated Syllabus Progress</strong>Your checkpoints are dynamically evaluated instantly by our engine.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lf-login-form-wrap">
+    {% if user.is_authenticated %}
+      <!-- Authenticated User Card -->
+      <div class="lf-form-card" style="text-align: center;">
+        <div class="lf-form-logo" style="margin-bottom: 24px;">
+          <div class="lf-form-logo-icon"><i class="ti ti-rocket" aria-hidden="true"></i></div>
+          <span class="lf-form-logo-text">Learn<span>ify</span></span>
+        </div>
+        <div style="font-size: 48px; margin-bottom: 20px; animation: floatCard1 4s ease-in-out infinite;">👋</div>
+        <h4 class="lf-form-title" style="margin-bottom: 8px;">Welcome back!</h4>
+        <p class="lf-form-sub" style="margin-bottom: 32px;">
+            Logged in as <strong>{{ user.get_full_name|default:user.username }}</strong> ({{ user.get_role_display }})
+        </p>
+        
+        <a href="{% url 'dashboard' %}" class="lf-submit-btn" style="text-decoration: none; margin-bottom: 16px;">
+          <span class="lf-btn-label"><i class="ti ti-dashboard" aria-hidden="true" style="margin-right: 6px;"></i> Go to Dashboard</span>
+        </a>
+        
+        <form action="{% url 'accounts:logout' %}" method="post" id="lf-logout-card">
+          {% csrf_token %}
+          <button type="submit" class="lf-social-card" style="width: 100%; border-color: rgba(239, 68, 68, 0.4); color: #f87171;">
+            <i class="ti ti-logout" aria-hidden="true"></i> Sign Out
+          </button>
+        </form>
+      </div>
+    {% else %}
+      <!-- Login Form Card -->
+      <div class="lf-form-card">
+        <div class="lf-form-header">
+          <div class="lf-form-logo">
+            <div class="lf-form-logo-icon"><i class="ti ti-rocket" aria-hidden="true"></i></div>
+            <span class="lf-form-logo-text">Learn<span>ify</span></span>
+          </div>
+          <div class="lf-form-title">Welcome back!</div>
+          <div class="lf-form-sub">Sign in to continue your journey</div>
+        </div>
+
+        <!-- Alert messages banner -->
+        {% if messages %}
+          {% for message in messages %}
+            <div class="lf-alert-banner {% if message.tags == 'error' %}error-banner{% endif %}" id="lf-alert-inner">
+              <i class="ti {% if message.tags == 'error' %}ti-alert-circle{% else %}ti-circle-check{% endif %} lf-alert-icon" aria-hidden="true"></i>
+              <span style="font-size: 11.5px;">{{ message }}</span>
+              <button class="lf-alert-close-btn" onclick="document.getElementById('lf-alert-inner').style.display='none'" aria-label="Close">×</button>
+            </div>
+          {% endfor %}
+        {% endif %}
+
+        <form method="post" action="{% url 'accounts:login' %}">
+          {% csrf_token %}
+          <div class="lf-field-group">
+            <label class="lf-field-label" for="username">Username</label>
+            <div class="lf-input-container">
+              <i class="ti ti-user lf-field-icon" aria-hidden="true"></i>
+              <input class="lf-field-input" type="text" name="username" id="username" placeholder="Enter username" autocomplete="username" required />
+            </div>
+          </div>
+
+          <div class="lf-field-group">
+            <label class="lf-field-label" for="password">Password</label>
+            <div class="lf-input-container">
+              <i class="ti ti-lock lf-field-icon" aria-hidden="true"></i>
+              <input class="lf-field-input" type="password" name="password" id="password" placeholder="Enter password" autocomplete="current-password" required />
+              <button type="button" class="lf-eye-btn" onclick="togglePwd()" aria-label="Toggle password" id="eye-btn"><i class="ti ti-eye" id="eye-icon"></i></button>
+            </div>
+          </div>
+
+          <div class="lf-form-row">
+            <label class="lf-check-row">
+              <input type="checkbox" class="lf-check-input" id="remember" checked />
+              <span class="lf-check-txt">Remember me</span>
+            </label>
+            <button type="button" class="lf-forgot-link">Forgot password?</button>
+          </div>
+
+          <button class="lf-submit-btn" type="submit">
+            <span class="lf-btn-label"><i class="ti ti-arrow-right" aria-hidden="true" style="margin-right: 6px;"></i> Sign In</span>
+          </button>
+        </form>
+
+        <div class="lf-divider-row"><div class="lf-div-line"></div><span class="lf-div-text">or sign in with</span><div class="lf-div-line"></div></div>
+
+        <div class="lf-social-row">
+          <button class="lf-social-card" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            Google
+          </button>
+          <button class="lf-social-card" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.268 2.75 1.026A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.026 2.747-1.026.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+            GitHub
+          </button>
+        </div>
+
+        <div class="lf-signup-row">Don't have an account? <a class="lf-signup-link" href="{% url 'accounts:register' %}">Sign up free</a></div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="lf-footer">
+  <div class="lf-footer-top">
+    <div class="lf-footer-brand">
+      <div class="lf-footer-logo">
+        <div class="lf-footer-logo-icon"><i class="ti ti-rocket" aria-hidden="true"></i></div>
+        <span class="lf-footer-logo-text">Learn<span>ify</span></span>
+      </div>
+      <div class="lf-footer-desc">India's most loved learning platform — making quality education accessible to every student.</div>
+    </div>
+    <div class="lf-footer-col">
+      <div class="lf-footer-col-title">Learn</div>
+      {% for item in category_data %}
+        <a href="{% url 'courses:course_list' %}?category={{ item.category.slug }}" class="lf-footer-col-link">{{ item.category.name }}</a>
+      {% empty %}
+        <a class="lf-footer-col-link">Web Development</a>
+        <a class="lf-footer-col-link">Python Django</a>
+        <a class="lf-footer-col-link">Data Science & AI</a>
+      {% endfor %}
+    </div>
+    <div class="lf-footer-col">
+      <div class="lf-footer-col-title">Exams</div>
+      <a class="lf-footer-col-link">JEE</a>
+      <a class="lf-footer-col-link">NEET</a>
+      <a class="lf-footer-col-link">CBSE</a>
+      <a class="lf-footer-col-link">UPSC</a>
+    </div>
+    <div class="lf-footer-col">
+      <div class="lf-footer-col-title">Company</div>
+      <a class="lf-footer-col-link">About us</a>
+      <a class="lf-footer-col-link">Careers</a>
+      <a class="lf-footer-col-link">Blog</a>
+      <a class="lf-footer-col-link">Contact</a>
+    </div>
+  </div>
+  <div class="lf-footer-bottom">
+    <span class="lf-footer-copy">© 2026 Learnify. All rights reserved.</span>
+    <div class="lf-footer-socials">
+      <button class="lf-footer-social-btn" aria-label="Twitter"><i class="ti ti-brand-twitter" aria-hidden="true"></i></button>
+      <button class="lf-footer-social-btn" aria-label="Instagram"><i class="ti ti-brand-instagram" aria-hidden="true"></i></button>
+      <button class="lf-footer-social-btn" aria-label="YouTube"><i class="ti ti-brand-youtube" aria-hidden="true"></i></button>
+      <button class="lf-footer-social-btn" aria-label="LinkedIn"><i class="ti ti-brand-linkedin" aria-hidden="true"></i></button>
+    </div>
+  </div>
+</footer>
+
+</div>
+
+<script>
+function togglePwd(){
+  const inp=document.getElementById('password');
+  const ico=document.getElementById('eye-icon');
+  if(inp.type==='password'){
+      inp.type='text';
+      ico.className='ti ti-eye-off';
+  } else {
+      inp.type='password';
+      ico.className='ti ti-eye';
+  }
+}
+</script>
+
+</body>
+</html>

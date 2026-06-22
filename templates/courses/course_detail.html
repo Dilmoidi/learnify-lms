@@ -1,0 +1,493 @@
+{% extends 'base.html' %}
+{% load static courses_extras %}
+
+{% block title %}{{ course.title }} - Learnify LMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Course Header Banner Card -->
+    <div class="card glass-card p-4 mb-4">
+        <div class="row align-items-center g-4">
+            <div class="col-md-3">
+                <div class="rounded overflow-hidden bg-sidebar" style="height: 150px;">
+                    {% if course.thumbnail %}
+                        <img src="{{ course.thumbnail.url }}" alt="{{ course.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
+                            <i class="bi bi-journal-bookmark fs-1 text-purple-accent"></i>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <span class="badge badge-custom badge-purple text-uppercase mb-2">{{ course.category.name }}</span>
+                <h2 class="text-white mb-2">{{ course.title }}</h2>
+                <p class="text-secondary mb-3">{{ course.description }}</p>
+                
+                <div class="d-flex flex-wrap gap-4 text-secondary" style="font-size: 0.9rem;">
+                    <div>
+                        <i class="bi bi-person-fill text-purple-accent me-1"></i>
+                        <span>Instructor: <strong>{{ course.instructor.user.get_full_name|default:course.instructor.user.username }}</strong></span>
+                    </div>
+                    <div>
+                        <i class="bi bi-play-circle-fill text-teal me-1"></i>
+                        <span>Lessons: <strong>{{ lessons.count }}</strong></span>
+                    </div>
+                    <div>
+                        <i class="bi bi-star-fill text-amber me-1"></i>
+                        <span>Rating: <strong>{{ course.average_rating }}</strong> ({{ reviews.count }} reviews)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contextual CTA Area (Enroll / Progress / Edit) -->
+            <div class="col-md-3 text-md-end">
+                {% if user.is_authenticated %}
+                    {% if user.role == 'student' %}
+                        {% if is_enrolled %}
+                            <div class="p-3 rounded card-teal text-start mb-2">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold text-teal" style="font-size: 0.85rem;">Enrolled Progress</span>
+                                    <span class="fw-bold text-teal" style="font-size: 0.85rem;">{{ enrollment.progress_percentage }}%</span>
+                                </div>
+                                <div class="progress-container">
+                                    <div class="progress-bar-premium" style="width: {{ enrollment.progress_percentage }}%;"></div>
+                                </div>
+                            </div>
+                            {% if lessons.first %}
+                                <a href="{% url 'courses:lesson_view' course.slug lessons.first.id %}" class="btn btn-premium w-100 mt-2">
+                                    <i class="bi bi-play-fill me-1"></i>Resume Course
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <a href="{% url 'courses:enroll_in_course' course.slug %}" class="btn btn-premium w-100">
+                                <i class="bi bi-bookmark-plus me-1"></i>Enroll Now
+                            </a>
+                        {% endif %}
+                    {% elif user.role == 'instructor' and course.instructor == user.instructor_profile or user.is_superuser %}
+                        <div class="d-flex flex-column gap-2">
+                            <span class="badge badge-custom badge-amber text-center">Owner Mode</span>
+                            <a href="{% url 'courses:course_edit' course.pk %}" class="btn btn-outline-premium btn-sm w-100">
+                                <i class="bi bi-pencil-square me-1"></i>Edit Course Info
+                            </a>
+                            <a href="{% url 'courses:lesson_add' course.id %}" class="btn btn-premium btn-sm w-100">
+                                <i class="bi bi-plus-circle me-1"></i>Add Lesson
+                            </a>
+                            <a href="{% url 'courses:course_delete' course.pk %}" class="btn btn-sm btn-outline-danger w-100" style="border-color: var(--pink-border); color: var(--pink-main);">
+                                <i class="bi bi-trash me-1"></i>Delete Course
+                            </a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="btn btn-premium w-100">Login to Enroll</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Content Tabbed Panel -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card glass-card p-4">
+                <!-- Tabs headers -->
+                <ul class="nav nav-tabs border-default mb-4" id="courseTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active text-white border-0 bg-transparent fw-bold pb-3" id="syllabus-tab" data-bs-toggle="tab" data-bs-target="#syllabus" type="button" role="tab" aria-controls="syllabus" aria-selected="true" style="border-bottom: 2px solid var(--purple-accent) !important;">
+                            <i class="bi bi-list-task me-2"></i>Syllabus
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link text-white border-0 bg-transparent fw-bold pb-3" id="announcements-tab" data-bs-toggle="tab" data-bs-target="#announcements" type="button" role="tab" aria-controls="announcements" aria-selected="false">
+                            <i class="bi bi-megaphone me-2"></i>Announcements ({{ announcements.count }})
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link text-white border-0 bg-transparent fw-bold pb-3" id="forum-tab" data-bs-toggle="tab" data-bs-target="#forum" type="button" role="tab" aria-controls="forum" aria-selected="false">
+                            <i class="bi bi-chat-left-text me-2"></i>Discussion Q&A
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link text-white border-0 bg-transparent fw-bold pb-3" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">
+                            <i class="bi bi-star me-2"></i>Reviews ({{ reviews.count }})
+                        </button>
+                    </li>
+                </ul>
+                
+                <!-- Tabs content -->
+                <div class="tab-content" id="courseTabContent">
+                    
+                    <!-- Syllabus Tab -->
+                    <div class="tab-pane fade show active" id="syllabus" role="tabpanel" aria-labelledby="syllabus-tab">
+                        {% if lessons %}
+                            <div class="list-group d-flex flex-column gap-3">
+                                {% for lesson in lessons %}
+                                    <div class="list-group-item bg-sidebar border-default rounded p-3 d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="rounded-circle bg-page border border-default d-flex align-items-center justify-content-center fw-bold text-secondary" style="width: 35px; height: 35px;">
+                                                {{ forloop.counter }}
+                                            </div>
+                                            <div>
+                                                {% if is_enrolled %}
+                                                    <a href="{% url 'courses:lesson_view' course.slug lesson.id %}" class="fw-bold text-white fs-6 link-hover">
+                                                        {{ lesson.title }}
+                                                    </a>
+                                                {% else %}
+                                                    <span class="fw-bold text-secondary fs-6">
+                                                        <i class="bi bi-lock-fill me-1"></i>{{ lesson.title }}
+                                                    </span>
+                                                {% endif %}
+                                                <small class="d-block text-muted mt-1">{{ lesson.description|truncatewords:12 }}</small>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-flex align-items-center gap-3">
+                                            {% if user.role == 'instructor' and course.instructor == user.instructor_profile or user.is_superuser %}
+                                                <a href="{% url 'courses:lesson_edit' lesson.pk %}" class="btn btn-outline-premium btn-sm p-2"><i class="bi bi-pencil"></i></a>
+                                                <a href="{% url 'courses:lesson_delete' lesson.pk %}" class="btn btn-outline-danger btn-sm p-2" style="border-color: var(--pink-border); color: var(--pink-main);"><i class="bi bi-trash"></i></a>
+                                            {% endif %}
+                                            
+                                            {% if is_enrolled and user.role == 'student' %}
+                                                {% for lp in enrollment.lesson_progresses.all %}
+                                                    {% if lp.lesson == lesson %}
+                                                        {% if lp.is_completed %}
+                                                            <span class="badge badge-custom badge-teal"><i class="bi bi-check-circle-fill me-1"></i>Completed</span>
+                                                        {% else %}
+                                                            <span class="badge badge-custom badge-amber"><i class="bi bi-circle me-1"></i>In Progress</span>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5 text-secondary mb-4">
+                                <i class="bi bi-journal-text fs-1 d-block mb-2 text-muted"></i>
+                                <span>No lessons have been uploaded to this course yet.</span>
+                            </div>
+                        {% endif %}
+
+                        <!-- Assignments Block -->
+                        <div class="mt-5 mb-4 pt-4 border-top border-default">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <h4 class="text-white mb-0"><i class="bi bi-file-earmark-text text-purple-accent me-2"></i>Course Assignments</h4>
+                                {% if user.role == 'instructor' and course.instructor == user.instructor_profile or user.is_superuser %}
+                                    <a href="{% url 'assignments:assignment_create' course.id %}" class="btn btn-outline-premium btn-sm">
+                                        <i class="bi bi-plus-lg me-1"></i>Add Assignment
+                                    </a>
+                                {% endif %}
+                            </div>
+                            
+                            {% if assignments %}
+                                <div class="list-group d-flex flex-column gap-3">
+                                    {% for assignment in assignments %}
+                                        <div class="list-group-item bg-sidebar border-default rounded p-3 d-flex align-items-center justify-content-between">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="rounded bg-page border border-default d-flex align-items-center justify-content-center text-secondary" style="width: 35px; height: 35px;">
+                                                    <i class="bi bi-file-earmark-text text-purple-accent"></i>
+                                                </div>
+                                                <div>
+                                                    {% if is_enrolled and user.role == 'student' %}
+                                                        <a href="{% url 'assignments:submit_assignment' assignment.id %}" class="fw-bold text-white fs-6 link-hover">
+                                                            {{ assignment.title }}
+                                                        </a>
+                                                    {% elif is_enrolled %}
+                                                        <span class="fw-bold text-white fs-6">
+                                                            {{ assignment.title }}
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="fw-bold text-secondary fs-6">
+                                                            <i class="bi bi-lock-fill me-1"></i>{{ assignment.title }}
+                                                        </span>
+                                                    {% endif %}
+                                                    <small class="d-block text-muted mt-1">Due: {{ assignment.due_date|date:"M d, Y - H:i" }} | Max Marks: {{ assignment.max_marks }} pts</small>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="d-flex align-items-center gap-3">
+                                                {% if user.role == 'instructor' and course.instructor == user.instructor_profile or user.is_superuser %}
+                                                    <a href="{% url 'assignments:assignment_submissions' assignment.id %}" class="btn btn-outline-premium btn-sm">
+                                                        Submissions ({{ assignment.submissions.count }})
+                                                    </a>
+                                                    <a href="{% url 'assignments:assignment_edit' assignment.pk %}" class="btn btn-outline-premium btn-sm p-2"><i class="bi bi-pencil"></i></a>
+                                                    <a href="{% url 'assignments:assignment_delete' assignment.pk %}" class="btn btn-outline-danger btn-sm p-2" style="border-color: var(--pink-border); color: var(--pink-main);"><i class="bi bi-trash"></i></a>
+                                                {% endif %}
+                                                
+                                                {% if is_enrolled and user.role == 'student' %}
+                                                    {% with sub=submissions_dict|dict_get:assignment.id %}
+                                                    {% if sub %}
+                                                        {% if sub.status == 'graded' %}
+                                                            <span class="badge badge-custom badge-teal"><i class="bi bi-check-circle-fill me-1"></i>Graded: {{ sub.grade }}/{{ assignment.max_marks }}</span>
+                                                        {% else %}
+                                                            <span class="badge badge-custom badge-amber"><i class="bi bi-hourglass-split me-1"></i>Submitted</span>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <span class="badge badge-custom badge-pink"><i class="bi bi-exclamation-circle me-1"></i>Not Submitted</span>
+                                                    {% endif %}
+                                                    {% endwith %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4 text-secondary bg-sidebar rounded border-default">
+                                    <span style="font-size: 0.9rem;">No assignments added for this course yet.</span>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Quizzes Block -->
+                        <div class="mt-5 mb-2 pt-4 border-top border-default">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <h4 class="text-white mb-0"><i class="bi bi-patch-question text-purple-accent me-2"></i>Course Quizzes</h4>
+                                {% if user.role == 'instructor' and course.instructor == user.instructor_profile or user.is_superuser %}
+                                    <a href="{% url 'quizzes:quiz_create' course.id %}" class="btn btn-outline-premium btn-sm">
+                                        <i class="bi bi-plus-lg me-1"></i>Add Quiz
+                                    </a>
+                                {% endif %}
+                            </div>
+                            
+                            {% if quizzes %}
+                                <div class="list-group d-flex flex-column gap-3">
+                                    {% for quiz in quizzes %}
+                                        <div class="list-group-item bg-sidebar border-default rounded p-3 d-flex align-items-center justify-content-between">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="rounded bg-page border border-default d-flex align-items-center justify-content-center text-secondary" style="width: 35px; height: 35px;">
+                                                    <i class="bi bi-patch-question text-purple-accent"></i>
+                                                </div>
+                                                <div>
+                                                    {% if is_enrolled and user.role == 'student' %}
+                                                        <a href="{% url 'quizzes:take_quiz' course.slug quiz.id %}" class="fw-bold text-white fs-6 link-hover">
+                                                            {{ quiz.title }}
+                                                        </a>
+                                                    {% elif is_enrolled %}
+                                                        <span class="fw-bold text-white fs-6">
+                                                            {{ quiz.title }}
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="fw-bold text-secondary fs-6">
+                                                            <i class="bi bi-lock-fill me-1"></i>{{ quiz.title }}
+                                                        </span>
+                                                    {% endif %}
+                                                    <small class="d-block text-muted mt-1">Passing Score: {{ quiz.pass_percentage }}% | Items: {{ quiz.questions.count }} questions</small>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="d-flex align-items-center gap-3">
+                                                {% if user.role == 'instructor' and course.instructor == user.instructor_profile or user.is_superuser %}
+                                                    <a href="{% url 'quizzes:quiz_questions_manage' quiz.id %}" class="btn btn-outline-premium btn-sm">
+                                                        Questions ({{ quiz.questions.count }})
+                                                    </a>
+                                                    <a href="{% url 'quizzes:quiz_edit' quiz.pk %}" class="btn btn-outline-premium btn-sm p-2"><i class="bi bi-pencil"></i></a>
+                                                    <a href="{% url 'quizzes:quiz_delete' quiz.pk %}" class="btn btn-outline-danger btn-sm p-2" style="border-color: var(--pink-border); color: var(--pink-main);"><i class="bi bi-trash"></i></a>
+                                                {% endif %}
+                                                
+                                                {% if is_enrolled and user.role == 'student' %}
+                                                    {% with res=results_dict|dict_get:quiz.id %}
+                                                    {% if res %}
+                                                        {% if res.passed %}
+                                                            <span class="badge badge-custom badge-teal"><i class="bi bi-check-circle-fill me-1"></i>Passed: {{ res.percentage }}%</span>
+                                                        {% else %}
+                                                            <span class="badge badge-custom badge-pink"><i class="bi bi-x-circle-fill me-1"></i>Failed: {{ res.percentage }}%</span>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <span class="badge badge-custom badge-amber"><i class="bi bi-play-circle me-1"></i>Not Attempted</span>
+                                                    {% endif %}
+                                                    {% endwith %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4 text-secondary bg-sidebar rounded border-default">
+                                    <span style="font-size: 0.9rem;">No quizzes added for this course yet.</span>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                    <!-- Announcements Tab -->
+                    <div class="tab-pane fade" id="announcements" role="tabpanel" aria-labelledby="announcements-tab">
+                        {% if user.role == 'instructor' and course.instructor == user.instructor_profile or user.is_superuser %}
+                            <!-- Post Announcement Form (Instructor Only) -->
+                            <div class="card bg-sidebar border-default p-4 mb-4">
+                                <h5 class="text-white mb-3"><i class="bi bi-megaphone text-purple-accent me-2"></i>Post Course Announcement</h5>
+                                <form method="post" action="{% url 'courses:create_announcement' course.slug %}">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        {{ announcement_form.title }}
+                                    </div>
+                                    <div class="mb-3">
+                                        {{ announcement_form.content }}
+                                    </div>
+                                    <button type="submit" class="btn btn-premium btn-sm"><i class="bi bi-send me-1"></i>Publish Announcement</button>
+                                </form>
+                            </div>
+                        {% endif %}
+
+                        <!-- List of Announcements -->
+                        <h5 class="text-white mb-3">Recent Notices & Announcements</h5>
+                        {% if announcements %}
+                            <div class="d-flex flex-column gap-3">
+                                {% for ann in announcements %}
+                                    <div class="card bg-sidebar border-default p-3 position-relative">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="bi bi-megaphone-fill text-amber fs-5"></i>
+                                                <span class="fw-bold text-white fs-6">{{ ann.title }}</span>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <small class="text-muted" style="font-size: 0.75rem;">{{ ann.created_at|date:"M d, Y - H:i" }}</small>
+                                                {% if user.role == 'instructor' and course.instructor == user.instructor_profile or user.is_superuser %}
+                                                    <a href="{% url 'courses:delete_announcement' course.slug ann.id %}" class="btn btn-sm btn-outline-danger p-1 px-2" style="font-size: 0.75rem;" onclick="return confirm('Are you sure you want to delete this announcement?');">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <p class="text-secondary mb-0" style="font-size: 0.85rem; white-space: pre-line;">{{ ann.content }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5 text-secondary">
+                                <i class="bi bi-megaphone fs-1 d-block mb-2 text-muted"></i>
+                                <span>No announcements have been posted for this course yet.</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Forum Tab -->
+                    <div class="tab-pane fade" id="forum" role="tabpanel" aria-labelledby="forum-tab">
+                        {% if is_enrolled or user.role == 'instructor' or user.is_superuser %}
+                            
+                            <!-- Post Thread Form -->
+                            <div class="card bg-sidebar border-default p-4 mb-4">
+                                <h5 class="text-white mb-3"><i class="bi bi-question-circle text-purple-accent me-2"></i>Ask a Question</h5>
+                                <form method="post" action="{% url 'courses:create_discussion_thread' course.slug %}">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        {{ thread_form.title }}
+                                    </div>
+                                    <div class="mb-3">
+                                        {{ thread_form.content }}
+                                    </div>
+                                    <button type="submit" class="btn btn-premium btn-sm"><i class="bi bi-send me-1"></i>Post Question</button>
+                                </form>
+                            </div>
+
+                            <!-- List of Threads -->
+                            <h5 class="text-white mb-3">Community Questions</h5>
+                            {% if threads %}
+                                <div class="d-flex flex-column gap-3">
+                                    {% for thread in threads %}
+                                        <div class="card bg-sidebar border-default p-3 discussion-card">
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    {% if thread.user.profile_picture %}
+                                                        <img src="{{ thread.user.profile_picture.url }}" alt="User" class="rounded-circle" style="width: 30px; height: 30px; object-fit: cover;">
+                                                    {% else %}
+                                                        <i class="bi bi-person-circle fs-5 text-secondary"></i>
+                                                    {% endif %}
+                                                    <span class="fw-bold text-white" style="font-size: 0.9rem;">{{ thread.user.get_full_name|default:thread.user.username }}</span>
+                                                    <small class="badge badge-custom {% if thread.user.role == 'student' %}badge-teal{% elif thread.user.role == 'instructor' %}badge-amber{% else %}badge-purple{% endif %} text-uppercase" style="font-size: 0.65rem;">
+                                                        {{ thread.user.role }}
+                                                    </small>
+                                                </div>
+                                                <small class="text-muted" style="font-size: 0.75rem;">{{ thread.created_at|timesince }} ago</small>
+                                            </div>
+                                            <h6 class="text-white mb-1">{{ thread.title }}</h6>
+                                            <p class="text-secondary mb-3" style="font-size: 0.85rem;">{{ thread.content|linebreaksbr }}</p>
+                                            
+                                            <div class="d-flex align-items-center justify-content-between border-top border-default pt-2">
+                                                <span class="text-muted" style="font-size: 0.8rem;"><i class="bi bi-chat-dots me-1"></i>{{ thread.replies.count }} replies</span>
+                                                <a href="{% url 'courses:discussion_thread_detail' course.slug thread.id %}" class="btn btn-outline-premium btn-sm py-1 px-3" style="font-size: 0.8rem;">
+                                                    View & Reply
+                                                </a>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5 text-secondary">
+                                    <i class="bi bi-chat-square-dots fs-1 d-block mb-2 text-muted"></i>
+                                    <span>No discussions yet. Be the first to ask a question!</span>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="text-center py-5 text-secondary">
+                                <i class="bi bi-lock-fill fs-1 d-block mb-2 text-pink"></i>
+                                <h5>Discussion Board Locked</h5>
+                                <p>You must enroll in this course to access the community discussion forums.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Reviews Tab -->
+                    <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
+                        <!-- Leave review form -->
+                        {% if review_form %}
+                            <div class="card bg-sidebar border-default p-4 mb-4">
+                                <h5 class="text-white mb-3"><i class="bi bi-chat-square-heart text-amber me-2"></i>Rate this Course</h5>
+                                <form method="post" action="{% url 'courses:create_course_review' course.slug %}">
+                                    {% csrf_token %}
+                                    <div class="row align-items-center mb-3">
+                                        <div class="col-md-3">
+                                            <label for="id_rating" class="form-label mb-0 text-secondary">Star Rating</label>
+                                            {{ review_form.rating }}
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="id_comment" class="form-label text-secondary">Review Comment</label>
+                                        {{ review_form.comment }}
+                                    </div>
+                                    <button type="submit" class="btn btn-premium btn-sm"><i class="bi bi-star-fill me-1 text-amber"></i>Submit Review</button>
+                                </form>
+                            </div>
+                        {% endif %}
+
+                        <!-- List of Reviews -->
+                        <h5 class="text-white mb-3">Student Reviews</h5>
+                        {% if reviews %}
+                            <div class="d-flex flex-column gap-3">
+                                {% for rev in reviews %}
+                                    <div class="card bg-sidebar border-default p-3">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <div class="d-flex align-items-center gap-2">
+                                                {% if rev.student.user.profile_picture %}
+                                                    <img src="{{ rev.student.user.profile_picture.url }}" alt="Student" class="rounded-circle" style="width: 30px; height: 30px; object-fit: cover;">
+                                                {% else %}
+                                                    <i class="bi bi-person-circle fs-5 text-secondary"></i>
+                                                {% endif %}
+                                                <span class="fw-bold text-white" style="font-size: 0.9rem;">{{ rev.student.user.get_full_name|default:rev.student.user.username }}</span>
+                                            </div>
+                                            
+                                            <!-- Stars -->
+                                            <div class="d-flex align-items-center text-amber gap-1">
+                                                <i class="bi bi-star-fill"></i>
+                                                <span class="text-white fw-bold" style="font-size: 0.85rem;">{{ rev.rating }}</span>
+                                            </div>
+                                        </div>
+                                        <p class="text-secondary mb-1" style="font-size: 0.85rem;">{{ rev.comment }}</p>
+                                        <small class="text-muted" style="font-size: 0.75rem;">Reviewed on {{ rev.created_at|date:"M d, Y" }}</small>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5 text-secondary">
+                                <i class="bi bi-star fs-1 d-block mb-2 text-muted"></i>
+                                <span>No reviews submitted yet for this course.</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Edit Question{% else %}Add Question{% endif %} - Learnify{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <a href="{% url 'quizzes:quiz_questions_manage' quiz.id %}" class="btn btn-outline-premium btn-sm mb-4">
+        <i class="bi bi-arrow-left me-1"></i>Back to Question List
+    </a>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card glass-card p-4">
+                <h4 class="text-white mb-4">
+                    <i class="bi bi-patch-question text-purple me-2"></i>
+                    {% if object %}Modify MCQ Question{% else %}Create MCQ Question{% endif %}
+                </h4>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <label for="id_question_text" class="form-label">Question Text</label>
+                        {{ form.question_text }}
+                        {% if form.question_text.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.question_text.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <h5 class="text-primary mb-3">Options Settings</h5>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label for="id_option_1" class="form-label text-secondary">Option 1</label>
+                            {{ form.option_1 }}
+                            {% if form.option_1.errors %}
+                                <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.option_1.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_option_2" class="form-label text-secondary">Option 2</label>
+                            {{ form.option_2 }}
+                            {% if form.option_2.errors %}
+                                <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.option_2.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label for="id_option_3" class="form-label text-secondary">Option 3</label>
+                            {{ form.option_3 }}
+                            {% if form.option_3.errors %}
+                                <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.option_3.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_option_4" class="form-label text-secondary">Option 4</label>
+                            {{ form.option_4 }}
+                            {% if form.option_4.errors %}
+                                <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.option_4.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_correct_option" class="form-label text-amber">Correct Option Number</label>
+                        {{ form.correct_option }}
+                        <small class="text-muted d-block mt-1">Select option index that corresponds to correct answer value.</small>
+                        {% if form.correct_option.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.correct_option.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="btn btn-premium w-100">
+                        {% if object %}Save Question Changes{% else %}Add Question to Quiz{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

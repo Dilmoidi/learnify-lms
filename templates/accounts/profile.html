@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Profile - Learnify LMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="row">
+        <!-- Profile summary card -->
+        <div class="col-lg-4 mb-4">
+            <div class="card glass-card text-center p-4">
+                <div class="position-relative d-inline-block mx-auto mb-3">
+                    {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="{{ user.username }}" class="rounded-circle border border-3" style="width: 120px; height: 120px; object-fit: cover; border-color: var(--purple-accent) !important;">
+                    {% else %}
+                        <div class="rounded-circle bg-sidebar border border-3 d-flex align-items-center justify-content-center mx-auto" style="width: 120px; height: 120px; border-color: var(--border-strong) !important;">
+                            <i class="bi bi-person text-secondary" style="font-size: 4rem;"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <h4 class="text-white mb-1">{{ user.get_full_name|default:user.username }}</h4>
+                <p class="text-muted mb-3">@{{ user.username }}</p>
+                
+                <span class="badge badge-custom {% if user.role == 'student' %}badge-teal{% elif user.role == 'instructor' %}badge-amber{% else %}badge-purple{% endif %} text-uppercase mb-4">
+                    {{ user.role }}
+                </span>
+                
+                <hr style="border-color: var(--border-default);">
+                
+                <div class="text-start mt-3">
+                    <h6 class="text-primary mb-2">Details</h6>
+                    <p class="text-secondary mb-2" style="font-size: 0.9rem;">
+                        <i class="bi bi-envelope text-purple-accent me-2"></i>{{ user.email }}
+                    </p>
+                    {% if user.role == 'student' and user.student_profile.phone %}
+                        <p class="text-secondary mb-2" style="font-size: 0.9rem;">
+                            <i class="bi bi-telephone text-purple-accent me-2"></i>{{ user.student_profile.phone }}
+                        </p>
+                    {% elif user.role == 'instructor' %}
+                        {% if user.instructor_profile.phone %}
+                            <p class="text-secondary mb-2" style="font-size: 0.9rem;">
+                                <i class="bi bi-telephone text-purple-accent me-2"></i>{{ user.instructor_profile.phone }}
+                            </p>
+                        {% endif %}
+                        {% if user.instructor_profile.specialization %}
+                            <p class="text-secondary mb-2" style="font-size: 0.9rem;">
+                                <i class="bi bi-award text-purple-accent me-2"></i>{{ user.instructor_profile.specialization }}
+                            </p>
+                        {% endif %}
+                        <p class="text-secondary mb-0" style="font-size: 0.9rem;">
+                            <i class="bi bi-shield-check text-purple-accent me-2"></i>Status: 
+                            {% if user.instructor_profile.is_approved %}
+                                <span class="text-teal">Approved</span>
+                            {% else %}
+                                <span class="text-amber">Pending Approval</span>
+                            {% endif %}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Profile Form -->
+        <div class="col-lg-8">
+            <div class="card glass-card p-4">
+                <h4 class="text-white mb-4"><i class="bi bi-gear-fill text-purple me-2"></i>Account Settings</h4>
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <h5 class="text-primary mb-3">Personal Information</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label for="id_first_name" class="form-label">First Name</label>
+                            <input type="text" name="first_name" id="id_first_name" class="form-control" value="{{ user_form.first_name.value|default:'' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_last_name" class="form-label">Last Name</label>
+                            <input type="text" name="last_name" id="id_last_name" class="form-control" value="{{ user_form.last_name.value|default:'' }}" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_email" class="form-label">Email Address</label>
+                        <input type="email" name="email" id="id_email" class="form-control" value="{{ user_form.email.value|default:'' }}" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_profile_picture" class="form-label">Profile Picture</label>
+                        <input type="file" name="profile_picture" id="id_profile_picture" class="form-control">
+                        {% if user.profile_picture %}
+                            <small class="text-muted d-block mt-1">Currently: <a href="{{ user.profile_picture.url }}" target="_blank">{{ user.profile_picture.name }}</a></small>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_bio" class="form-label">Biography / About Me</label>
+                        <textarea name="bio" id="id_bio" class="form-control" rows="4" placeholder="Tell us about yourself...">{{ user_form.bio.value|default:'' }}</textarea>
+                    </div>
+
+                    {% if profile_form %}
+                        <h5 class="text-primary mb-3 mt-4">Profile Details</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label for="id_phone" class="form-label">Phone Number</label>
+                                <input type="text" name="phone" id="id_phone" class="form-control" value="{{ profile_form.phone.value|default:'' }}">
+                            </div>
+                            {% if user.role == 'instructor' %}
+                                <div class="col-md-6">
+                                    <label for="id_specialization" class="form-label">Specialization</label>
+                                    <input type="text" name="specialization" id="id_specialization" class="form-control" value="{{ profile_form.specialization.value|default:'' }}">
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <button type="submit" class="btn btn-premium mt-3">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

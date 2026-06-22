@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Forum: {{ thread.title }} - Learnify{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Breadcrumb back link -->
+    <a href="{% url 'courses:course_detail' course.slug %}#forum" class="btn btn-outline-premium btn-sm mb-4">
+        <i class="bi bi-arrow-left me-1"></i>Back to Q&A Board
+    </a>
+
+    <!-- Original Question Card -->
+    <div class="card glass-card p-4 mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-default pb-3">
+            <div class="d-flex align-items-center gap-3">
+                {% if thread.user.profile_picture %}
+                    <img src="{{ thread.user.profile_picture.url }}" alt="User" class="rounded-circle" style="width: 45px; height: 45px; object-fit: cover;">
+                {% else %}
+                    <div class="rounded-circle bg-sidebar border border-default d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                        <i class="bi bi-person text-secondary fs-4"></i>
+                    </div>
+                {% endif %}
+                <div>
+                    <div class="fw-bold text-white">{{ thread.user.get_full_name|default:thread.user.username }}</div>
+                    <small class="badge badge-custom {% if thread.user.role == 'student' %}badge-teal{% elif thread.user.role == 'instructor' %}badge-amber{% else %}badge-purple{% endif %} text-uppercase mt-1" style="font-size: 0.65rem;">
+                        {{ thread.user.role }}
+                    </small>
+                </div>
+            </div>
+            
+            <small class="text-muted">{{ thread.created_at|date:"M d, Y - H:i" }}</small>
+        </div>
+        
+        <h4 class="text-white mb-3">{{ thread.title }}</h4>
+        <p class="text-secondary" style="font-size: 1rem; line-height: 1.6;">{{ thread.content|linebreaksbr }}</p>
+    </div>
+
+    <!-- Replies Section -->
+    <h5 class="text-white mb-3"><i class="bi bi-chat-dots text-purple-accent me-2"></i>Replies ({{ replies.count }})</h5>
+    
+    {% if replies %}
+        <div class="d-flex flex-column gap-3 mb-4">
+            {% for reply in replies %}
+                <div class="card glass-card p-3 reply-card ms-4">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            {% if reply.user.profile_picture %}
+                                <img src="{{ reply.user.profile_picture.url }}" alt="User" class="rounded-circle" style="width: 28px; height: 28px; object-fit: cover;">
+                            {% else %}
+                                <i class="bi bi-person-circle fs-5 text-secondary"></i>
+                            {% endif %}
+                            <span class="fw-bold text-white" style="font-size: 0.85rem;">{{ reply.user.get_full_name|default:reply.user.username }}</span>
+                            <small class="badge badge-custom {% if reply.user.role == 'student' %}badge-teal{% elif reply.user.role == 'instructor' %}badge-amber{% else %}badge-purple{% endif %} text-uppercase" style="font-size: 0.60rem;">
+                                {{ reply.user.role }}
+                            </small>
+                        </div>
+                        <small class="text-muted" style="font-size: 0.75rem;">{{ reply.created_at|timesince }} ago</small>
+                    </div>
+                    <p class="text-secondary mb-0" style="font-size: 0.9rem; line-height: 1.5;">{{ reply.content|linebreaksbr }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-4 text-secondary glass-card mb-4 ms-4">
+            <span>No replies posted yet. Help clarify this topic by posting a response.</span>
+        </div>
+    {% endif %}
+
+    <!-- Write Reply Form -->
+    <div class="card glass-card p-4 ms-4">
+        <h5 class="text-white mb-3"><i class="bi bi-reply-all text-purple-accent me-2"></i>Write a Reply</h5>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                {{ form.content }}
+            </div>
+            <button type="submit" class="btn btn-premium btn-sm"><i class="bi bi-send-fill me-1"></i>Post Reply</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

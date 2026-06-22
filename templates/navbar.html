@@ -1,0 +1,75 @@
+{% load static %}
+<header class="top-navbar d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center gap-3">
+        <!-- Sidebar Toggle for Mobile -->
+        <button id="sidebarToggle" class="btn btn-outline-premium d-lg-none" aria-label="Toggle Navigation">
+            <i class="bi bi-list"></i>
+        </button>
+        
+        <!-- Quick Search Course Filter -->
+        <form class="d-none d-md-flex align-items-center" action="{% url 'courses:course_list' %}" method="get">
+            <div class="input-group">
+                <span class="input-group-text bg-sidebar border-default text-muted">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" name="search" class="form-control bg-sidebar border-default text-primary" placeholder="Search courses, lessons..." value="{{ request.GET.search|default:'' }}">
+            </div>
+        </form>
+    </div>
+    
+    <div class="d-flex align-items-center gap-3">
+        {% if user.is_authenticated %}
+            <!-- User Notification Bell -->
+            <div class="dropdown">
+                <button class="btn btn-outline-premium position-relative" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-bell"></i>
+                    <!-- Notification dot placeholder -->
+                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-pink border border-light rounded-circle"></span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end glass-card p-3 shadow-lg" aria-labelledby="notifDropdown" style="width: 300px;">
+                    <h6 class="text-primary mb-3">Recent Notifications</h6>
+                    <div class="d-flex flex-column gap-2">
+                        <div class="p-2 rounded card-purple" style="font-size: 0.85rem;">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="fw-bold">Welcome to Learnify!</span>
+                                <small class="text-muted">Just now</small>
+                            </div>
+                            <span class="text-secondary">Start exploring premium dark-themed courses.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Info Menu -->
+            <div class="dropdown">
+                <button class="btn btn-outline-premium d-flex align-items-center gap-2" type="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="Profile" class="rounded-circle" style="width: 28px; height: 28px; object-fit: cover;">
+                    {% else %}
+                        <i class="bi bi-person-circle fs-5"></i>
+                    {% endif %}
+                    <span class="d-none d-sm-inline">{{ user.username }}</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end glass-card p-2" aria-labelledby="profileDropdown">
+                    <li class="px-3 py-2 text-secondary border-bottom border-default">
+                        <div class="fw-bold text-primary">{{ user.get_full_name|default:user.username }}</div>
+                        <small class="badge badge-custom {% if user.role == 'student' %}badge-teal{% elif user.role == 'instructor' %}badge-amber{% else %}badge-purple{% endif %} text-uppercase">
+                            {{ user.role }}
+                        </small>
+                    </li>
+                    <li><a class="dropdown-item py-2" href="{% url 'accounts:profile' %}"><i class="bi bi-person me-2"></i>My Profile</a></li>
+                    <li><a class="dropdown-item py-2" href="{% url 'dashboard' %}"><i class="bi bi-grid me-2"></i>My Dashboard</a></li>
+                    <li><hr class="dropdown-divider border-default"></li>
+                    <li>
+                        <a class="dropdown-item py-2 text-pink" href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
+                            <i class="bi bi-box-arrow-right me-2"></i>Sign Out
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        {% else %}
+            <a href="{% url 'accounts:login' %}" class="btn btn-outline-premium">Sign In</a>
+            <a href="{% url 'accounts:register' %}" class="btn btn-premium">Get Started</a>
+        {% endif %}
+    </div>
+</header>

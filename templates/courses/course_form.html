@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Edit Course{% else %}Create Course{% endif %} - Learnify{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <a href="{% url 'courses:instructor_courses' %}" class="btn btn-outline-premium btn-sm mb-4">
+        <i class="bi bi-arrow-left me-1"></i>Back to My Courses
+    </a>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card glass-card p-4">
+                <h4 class="text-white mb-4">
+                    <i class="bi bi-journal-plus text-purple me-2"></i>
+                    {% if object %}Modify Course: {{ object.title }}{% else %}Create New Course{% endif %}
+                </h4>
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="id_title" class="form-label">Course Title</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.title.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_category" class="form-label">Category</label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.category.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_description" class="form-label">Description</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_thumbnail" class="form-label">Course Thumbnail</label>
+                        {{ form.thumbnail }}
+                        {% if form.thumbnail.errors %}
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">{{ form.thumbnail.errors }}</div>
+                        {% endif %}
+                        {% if object.thumbnail %}
+                            <small class="text-muted d-block mt-1">Current thumbnail: <a href="{{ object.thumbnail.url }}" target="_blank">{{ object.thumbnail.name }}</a></small>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-check form-switch mb-4">
+                        {{ form.is_published }}
+                        <label class="form-check-label text-secondary ms-2" for="id_is_published">Publish course immediately (visible in browse index)</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-premium w-100">
+                        {% if object %}Save Course Details{% else %}Create Course Blueprint{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

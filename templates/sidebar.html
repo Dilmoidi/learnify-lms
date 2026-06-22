@@ -1,0 +1,105 @@
+{% load static %}
+<nav id="sidebar">
+    <div class="sidebar-header">
+        <a href="{% url 'home' %}" class="sidebar-logo">
+            <i class="bi bi-rocket-takeoff text-purple"></i>
+            <span>Learnify</span>
+        </a>
+    </div>
+    
+    <ul class="sidebar-menu">
+        {% if user.is_authenticated %}
+            <!-- Common Dashboards depending on user role -->
+            <li class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                <a href="{% url 'dashboard' %}">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+
+            {% if user.role == 'student' or user.is_superuser %}
+                <li class="{% if request.resolver_match.url_name == 'course_list' or request.resolver_match.url_name == 'course_detail' %}active{% endif %}">
+                    <a href="{% url 'courses:course_list' %}">
+                        <i class="bi bi-search"></i>
+                        <span>Browse Courses</span>
+                    </a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'student_courses' %}active{% endif %}">
+                    <a href="{% url 'dashboard' %}">
+                        <i class="bi bi-journal-bookmark-fill"></i>
+                        <span>My Enrollments</span>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% if user.role == 'instructor' or user.is_superuser %}
+                <li class="{% if 'course_create' in request.path or 'instructor_courses' in request.path %}active{% endif %}">
+                    <a href="{% url 'courses:instructor_courses' %}">
+                        <i class="bi bi-journal-text"></i>
+                        <span>My Courses</span>
+                    </a>
+                </li>
+                <li class="{% if 'instructor/students' in request.path %}active{% endif %}">
+                    <a href="{% url 'courses:instructor_students_progress' %}">
+                        <i class="bi bi-people"></i>
+                        <span>Enrolled Students</span>
+                    </a>
+                </li>
+                <li class="{% if 'instructor/assignments' in request.path %}active{% endif %}">
+                    <a href="{% url 'assignments:instructor_assignments' %}">
+                        <i class="bi bi-file-earmark-check"></i>
+                        <span>Grade Assignments</span>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% if user.role == 'admin' or user.is_superuser %}
+                <li class="{% if 'admin_approvals' in request.path %}active{% endif %}">
+                    <a href="{% url 'accounts:admin_approvals' %}">
+                        <i class="bi bi-shield-check"></i>
+                        <span>Approvals</span>
+                    </a>
+                </li>
+            {% endif %}
+
+            <li class="mt-4">
+                <hr style="border-color: var(--border-default);">
+            </li>
+            
+            <li class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                <a href="{% url 'accounts:profile' %}">
+                    <i class="bi bi-person-circle"></i>
+                    <span>My Profile</span>
+                </a>
+            </li>
+            <li>
+                <form action="{% url 'accounts:logout' %}" method="post" id="logoutForm" class="d-none">
+                    {% csrf_token %}
+                </form>
+                <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
+                    <i class="bi bi-box-arrow-right text-pink"></i>
+                    <span>Sign Out</span>
+                </a>
+            </li>
+        {% else %}
+            <li class="{% if request.resolver_match.url_name == 'login' %}active{% endif %}">
+                <a href="{% url 'accounts:login' %}">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Login</span>
+                </a>
+            </li>
+            <li class="{% if request.resolver_match.url_name == 'register' %}active{% endif %}">
+                <a href="{% url 'accounts:register' %}">
+                    <i class="bi bi-person-plus"></i>
+                    <span>Register</span>
+                </a>
+            </li>
+            <li class="{% if request.resolver_match.url_name == 'course_list' %}active{% endif %}">
+                <a href="{% url 'courses:course_list' %}">
+                    <i class="bi bi-book"></i>
+                    <span>Explore Courses</span>
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>

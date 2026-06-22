@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Track Student Progress - Learnify Instructor{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header Block -->
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
+        <div>
+            <h2 class="text-white mb-1">Track Student Progress</h2>
+            <p class="text-secondary mb-0">View all enrolled students and monitor their syllabus completion rates.</p>
+        </div>
+        
+        <!-- Filter dropdown -->
+        <div style="min-width: 250px;">
+            <form method="get" id="filterForm">
+                <label for="course_id" class="form-label d-none">Filter by Course</label>
+                <select name="course_id" id="course_id" class="form-select" onchange="document.getElementById('filterForm').submit();">
+                    <option value="">All Courses</option>
+                    {% for course in courses %}
+                        <option value="{{ course.id }}" {% if selected_course_id|add:"0" == course.id %}selected{% endif %}>
+                            {{ course.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <!-- Enrolled Students Table -->
+    <div class="card glass-card p-4">
+        <h5 class="text-white mb-4"><i class="bi bi-people-fill text-teal me-2"></i>Enrolled Students ({{ enrollments.count }})</h5>
+        
+        {% if enrollments %}
+            <div class="table-responsive">
+                <table class="table table-premium align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Course</th>
+                            <th>Enrolled Date</th>
+                            <th>Progress %</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enrollment in enrollments %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-white">{{ enrollment.student.user.get_full_name|default:enrollment.student.user.username }}</div>
+                                    <small class="text-muted">@{{ enrollment.student.user.username }}</small>
+                                </td>
+                                <td>
+                                    <span class="text-white">{{ enrollment.course.title }}</span>
+                                </td>
+                                <td>
+                                    <span class="text-secondary" style="font-size: 0.85rem;">{{ enrollment.enrolled_at|date:"M d, Y" }}</span>
+                                </td>
+                                <td style="width: 25%;">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="progress-container flex-grow-1" style="height: 6px;">
+                                            <div class="progress-bar-premium" style="width: {{ enrollment.progress_percentage }}%;"></div>
+                                        </div>
+                                        <span class="fw-bold text-teal" style="font-size: 0.85rem;">{{ enrollment.progress_percentage }}%</span>
+                                    </div>
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'courses:instructor_student_detail_progress' enrollment.id %}" class="btn btn-premium btn-sm">
+                                        View Details
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5 text-secondary">
+                <i class="bi bi-people fs-1 d-block mb-2 text-muted"></i>
+                <span>No student enrollments found matching the criteria.</span>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
