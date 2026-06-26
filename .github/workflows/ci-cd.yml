@@ -88,8 +88,8 @@ jobs:
           RENDER_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: |
           if [ -z "$RENDER_HOOK" ]; then
-            echo "Error: RENDER_DEPLOY_HOOK_URL secret is not set in GitHub secrets."
-            exit 1
+            echo "::warning:: RENDER_DEPLOY_HOOK_URL secret is not set in GitHub secrets. Skipping deployment trigger."
+            exit 0
           fi
           echo "Triggering Render redeployment..."
           curl -f "$RENDER_HOOK"
