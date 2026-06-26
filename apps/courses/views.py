@@ -19,7 +19,7 @@ class CourseListView(ListView):
     model = Course
     template_name = 'courses/course_list'
     context_object_name = 'courses'
-    paginate_by = 6
+    paginate_by = 3
 
     def get_queryset(self):
         queryset = Course.objects.filter(is_published=True).select_related('category', 'instructor__user').order_by('-created_at')

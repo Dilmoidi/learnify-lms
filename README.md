@@ -96,6 +96,25 @@ Example:
 
 ---
 
+## CI/CD Pipeline
+
+The project includes an automated CI/CD pipeline powered by **GitHub Actions** (defined in `.github/workflows/ci-cd.yml`). The workflow performs three main jobs sequentially upon any push or pull request to the `main` or `master` branches:
+
+1. **Test (`Run Python Django Tests`)**:
+   - Spins up a clean Ubuntu runner, installs dependencies, and executes the unit test suite (`python manage.py test`).
+2. **Build (`Build & Push Docker Image`)**:
+   - Triggers only on code pushes/merges to primary branches.
+   - Logs into **GitHub Container Registry (GHCR)** using repository scopes.
+   - Compiles and publishes the production-ready Docker image (`ghcr.io/username/learnify-lms:latest`).
+3. **Deploy (`Trigger Render Deployment`)**:
+   - Performs a secure trigger hook request to Render to pull the updated Docker container and complete deployment.
+
+### Setup Secrets in GitHub:
+To activate automated deployments, go to your GitHub repository `Settings -> Secrets and variables -> Actions` and add:
+- **`RENDER_DEPLOY_HOOK_URL`**: The deploy hook URL found under your Render service dashboard (e.g. `https://api.render.com/deploy/srv-...`).
+
+---
+
 ## Author
 
 Dilsha Moideen

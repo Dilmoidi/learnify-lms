@@ -58,6 +58,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             file_url = data.get('file_url', None)
             file_name = data.get('file_name', None)
 
+            # Enforce 100 character length limit
+            if message_text:
+                message_text = message_text[:100]
+
             # Save message to database
             msg = await self.save_message(self.room_id, self.user, message_text, file_url)
 
